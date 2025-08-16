@@ -1,0 +1,15 @@
+{
+  "title": "Windows Privacy",
+  "tagline": "Mehr Privatsphäre unter Windows – einfach gemacht",
+  "features": [
+    { "title": "Transparente Einstellungen", "desc": "Schritt-für-Schritt durch die wichtigsten Windows-Optionen, sinnvoll erklärt." },
+    { "title": "Empfohlene Tools", "desc": "Kuratiert, minimal, ohne Bloat. Nur was wirklich hilft." },
+    { "title": "Sichere Defaults", "desc": "Gute Voreinstellungen, die sofort wirken – und später feinjustierbar sind." }
+  ],
+  "steps": [
+    "Windows-Telemetrie minimieren",
+    "App-Berechtigungen prüfen",
+    "Browser-Härtung aktivieren",
+    "Optionale Dienste ausmisten"
+  ]
+}

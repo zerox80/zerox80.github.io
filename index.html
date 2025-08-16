@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0f17" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'">
+    <meta name="description" content="Windows Privacy – Tipps, Tools und Anleitungen für maximale Privatsphäre unter Windows." />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:image" content="assets/favicon.svg" />
+    <meta property="og:title" content="Windows Privacy" />
+    <meta property="og:description" content="Windows Privacy – Tipps, Tools und Anleitungen für maximale Privatsphäre unter Windows." />
+    <meta property="og:type" content="website" />
+    <title>Windows Privacy</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Zum Inhalt springen</a>
+    <header class="site-header container">
+      <div class="brand">
+        <img class="brand__logo" src="assets/favicon.svg" alt="Windows Privacy Logo" width="28" height="28" />
+        <span class="brand__name">Windows Privacy</span>
+      </div>
+      <nav class="nav">
+        <a href="#features">Funktionen</a>
+        <a href="#scripts">Skripte</a>
+        <a href="#guide">Anleitung</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero container">
+        <h1>Mehr Privatsphäre unter Windows – einfach gemacht</h1>
+        <p class="lead">Klare Empfehlungen, sichere Defaults und ein konsequenter Dark Mode.</p>
+        <div class="actions">
+          <a class="btn btn--primary" href="#guide">Jetzt starten</a>
+          <a class="btn" href="#features">Mehr erfahren</a>
+        </div>
+        
+      </section>
+
+      <section id="scripts" class="container section">
+        <h2>Skripte</h2>
+        <p class="muted">Vorsicht: Änderungen am System. Lies die Hinweise und prüfe die Quelle. Admin-Rechte erforderlich, wo angegeben.</p>
+        <p class="muted">Hinweis: Befehle im Ordner dieser Seite ausführen (Pfadbezug der Beispiele).</p>
+        <noscript><p class="muted">Copy-Buttons benötigen JavaScript. Downloads funktionieren ohne JavaScript.</p></noscript>
+
+        <article class="card">
+          <h3>Telemetry minimieren <span class="badge">PowerShell</span> <span class="badge badge--warn">Admin</span></h3>
+          <p>Setzt Telemetrie-Werte auf Minimum, deaktiviert ausgewählte Tasks/Dienste. Empfohlen: zuerst Backup/Wiederherstellungspunkt.</p>
+          <div class="actions">
+            <a class="btn" href="assets/scripts/telemetry_minimize.ps1" download>Download .ps1</a>
+            <a class="btn" href="assets/scripts/telemetry_minimize.cmd" download>Download .cmd</a>
+            <button class="btn" type="button" aria-label="Befehl zum Ausführen kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\telemetry_minimize.ps1" data-clipboard-label="Befehl kopiert">Copy Befehl</button>
+            <a class="btn" href="assets/scripts/telemetry_revert.ps1" download>Revert .ps1</a>
+            <a class="btn" href="assets/scripts/telemetry_revert.cmd" download>Revert .cmd</a>
+            <button class="btn" type="button" aria-label="Revert-Befehl kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\telemetry_revert.ps1" data-clipboard-label="Revert-Befehl kopiert">Copy Revert</button>
+            <button class="btn" type="button" aria-label="Hash-Prüfung kopieren" data-clipboard="Get-FileHash .\\assets\\scripts\\telemetry_minimize.ps1 -Algorithm SHA256" data-clipboard-label="Hash-Befehl kopiert">Copy Hash</button>
+            <button class="btn" type="button" aria-label="Befehl mit -DisableWER kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\telemetry_minimize.ps1 -DisableWER" data-clipboard-label="Befehl (-DisableWER) kopiert">Copy (-DisableWER)</button>
+          </div>
+          <pre class="code"><code>.\assets\scripts\telemetry_minimize.cmd</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\telemetry_minimize.ps1</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\telemetry_minimize.ps1 -DisableWER</code></pre>
+          <pre class="code"><code>.\assets\scripts\telemetry_revert.cmd</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\telemetry_revert.ps1</code></pre>
+          <pre class="code"><code>Get-FileHash .\assets\scripts\telemetry_minimize.ps1 -Algorithm SHA256</code></pre>
+        </article>
+
+        <article class="card">
+          <h3>Sichere Defaults <span class="badge">REG</span></h3>
+          <p>Importiert empfehlenswerte Registry-Defaults (Telemetrie minimiert, Empfehlungen/Ads aus, Bing/Cortana aus).</p>
+          <div class="actions">
+            <a class="btn" href="assets/scripts/privacy_defaults.reg" download>Download .reg</a>
+            <button class="btn" type="button" aria-label="REG Import kopieren" data-clipboard="reg import .\\assets\\scripts\\privacy_defaults.reg" data-clipboard-label="REG-Befehl kopiert">Copy Import</button>
+            <a class="btn" href="assets/scripts/revert_defaults.reg" download>Revert .reg</a>
+            <button class="btn" type="button" aria-label="REG Revert kopieren" data-clipboard="reg import .\\assets\\scripts\\revert_defaults.reg" data-clipboard-label="Revert-Befehl kopiert">Copy Revert</button>
+            <button class="btn" type="button" aria-label="Hash-Prüfung kopieren" data-clipboard="Get-FileHash .\\assets\\scripts\\privacy_defaults.reg -Algorithm SHA256" data-clipboard-label="Hash-Befehl kopiert">Copy Hash</button>
+          </div>
+          <pre class="code"><code>reg import .\assets\scripts\privacy_defaults.reg</code></pre>
+          <pre class="code"><code>reg import .\assets\scripts\revert_defaults.reg</code></pre>
+          <pre class="code"><code>Get-FileHash .\assets\scripts\privacy_defaults.reg -Algorithm SHA256</code></pre>
+        </article>
+        
+        <article class="card">
+          <h3>Edge Härtung <span class="badge">REG</span></h3>
+          <p>Deaktiviert Telemetrie/Personalisierung in Microsoft Edge (optional).</p>
+          <div class="actions">
+            <a class="btn" href="assets/scripts/edge_hardening.reg" download>Download .reg</a>
+            <button class="btn" type="button" aria-label="REG Import kopieren" data-clipboard="reg import .\\assets\\scripts\\edge_hardening.reg" data-clipboard-label="REG-Befehl kopiert">Copy Import</button>
+            <a class="btn" href="assets/scripts/edge_revert.reg" download>Revert .reg</a>
+            <button class="btn" type="button" aria-label="REG Revert kopieren" data-clipboard="reg import .\\assets\\scripts\\edge_revert.reg" data-clipboard-label="Revert-Befehl kopiert">Copy Revert</button>
+            <button class="btn" type="button" aria-label="Hash-Prüfung kopieren" data-clipboard="Get-FileHash .\\assets\\scripts\\edge_hardening.reg -Algorithm SHA256" data-clipboard-label="Hash-Befehl kopiert">Copy Hash</button>
+          </div>
+          <pre class="code"><code>reg import .\assets\scripts\edge_hardening.reg</code></pre>
+          <pre class="code"><code>reg import .\assets\scripts\edge_revert.reg</code></pre>
+          <pre class="code"><code>Get-FileHash .\assets\scripts\edge_hardening.reg -Algorithm SHA256</code></pre>
+        </article>
+
+        <article class="card">
+          <h3>Optionale Bloatware entfernen <span class="badge">PowerShell</span> <span class="badge badge--warn">Admin</span></h3>
+          <p>Listet vorab alle Kandidaten (Vorschau). Mit -Apply wirklich entfernen. Vorsichtig einsetzen.</p>
+          <div class="actions">
+            <a class="btn" href="assets/scripts/remove_bloat.ps1" download>Download .ps1</a>
+            <a class="btn" href="assets/scripts/remove_bloat.cmd" download>Download .cmd</a>
+            <button class="btn" type="button" aria-label="Vorschau-Befehl kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\remove_bloat.ps1" data-clipboard-label="Vorschau kopiert">Copy Vorschau</button>
+            <button class="btn" type="button" aria-label="-List kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\remove_bloat.ps1 -List" data-clipboard-label="-List kopiert">Copy -List</button>
+            <button class="btn" type="button" aria-label="Entfernen (aktueller Benutzer) kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\remove_bloat.ps1 -Apply -CurrentUserOnly" data-clipboard-label="Entfernen (aktueller Benutzer) kopiert">Copy Entfernen (User)</button>
+            <button class="btn" type="button" aria-label="Entfernen (alle Benutzer) kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\remove_bloat.ps1 -Apply" data-clipboard-label="Entfernen (alle Benutzer) kopiert">Copy Entfernen (Alle)</button>
+            <button class="btn" type="button" aria-label="Entfernen Provisioned kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\remove_bloat.ps1 -Apply -ProvisionedOnly" data-clipboard-label="Entfernen (Provisioned) kopiert">Copy Provisioned</button>
+            <button class="btn" type="button" aria-label="Hash-Prüfung kopieren" data-clipboard="Get-FileHash .\\assets\\scripts\\remove_bloat.ps1 -Algorithm SHA256" data-clipboard-label="Hash-Befehl kopiert">Copy Hash</button>
+          </div>
+          <pre class="code"><code>.\assets\scripts\remove_bloat.cmd</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\remove_bloat.ps1</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\remove_bloat.ps1 -List</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\remove_bloat.ps1 -Apply -CurrentUserOnly</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\remove_bloat.ps1 -Apply</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\remove_bloat.ps1 -Apply -ProvisionedOnly</code></pre>
+          <pre class="code"><code>Get-FileHash .\assets\scripts\remove_bloat.ps1 -Algorithm SHA256</code></pre>
+        </article>
+        <article class="card">
+          <h3>Alle Skripte als Paket <span class="badge">PowerShell</span></h3>
+          <p>Erstellt lokal ein <code>scripts.zip</code> mit allen Skripten und README. Für Offline‑Nutzung.</p>
+          <div class="actions">
+            <a class="btn" href="assets/scripts/README.txt" download>README</a>
+            <a class="btn" href="assets/scripts/pack_scripts.cmd" download>Download .cmd</a>
+            <button class="btn" type="button" aria-label="Pack-Befehl kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\pack_scripts.ps1" data-clipboard-label="Pack-Befehl kopiert">Copy Pack</button>
+            <button class="btn" type="button" aria-label="Pack+Hash kopieren" data-clipboard="powershell -ExecutionPolicy Bypass -File .\\assets\\scripts\\pack_scripts.ps1 -HashZip" data-clipboard-label="Pack+Hash kopiert">Copy Pack+Hash</button>
+          </div>
+          <pre class="code"><code>.\assets\scripts\pack_scripts.cmd</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\pack_scripts.ps1</code></pre>
+          <pre class="code"><code>powershell -ExecutionPolicy Bypass -File .\assets\scripts\pack_scripts.ps1 -HashZip</code></pre>
+        </article>
+      </section>
+
+      <section id="features" class="container grid">
+        <article class="card">
+          <h3>Transparente Einstellungen</h3>
+          <p>Schritt-für-Schritt durch die wichtigsten Windows-Optionen, sinnvoll erklärt.</p>
+        </article>
+        <article class="card">
+          <h3>Empfohlene Tools</h3>
+          <p>Kuratiert, minimal, ohne Bloat. Nur was wirklich hilft.</p>
+        </article>
+        <article class="card">
+          <h3>Sichere Defaults</h3>
+          <p>Gute Voreinstellungen, die sofort wirken – und später feinjustierbar sind.</p>
+        </article>
+      </section>
+
+      <section id="guide" class="container section">
+        <h2>Kurzanleitung</h2>
+        <ol class="steps">
+          <li>Windows-Telemetrie minimieren</li>
+          <li>App-Berechtigungen prüfen</li>
+          <li>Browser-Härtung aktivieren</li>
+          <li>Optionale Dienste ausmisten</li>
+        </ol>
+        <p class="muted">Hinweis: Diese Seite ist bewusst minimal – fokussiert, schnell, privat.</p>
+      </section>
+
+      <section id="faq" class="container section">
+        <h2>FAQ</h2>
+        <details class="faq">
+          <summary>Ist das Projekt komplett offline nutzbar?</summary>
+          <div>Ja. Keine Tracker, keine externen Skripte oder externen Fonts.</div>
+        </details>
+        <details class="faq">
+          <summary>Gibt es einen Light Mode?</summary>
+          <div>Nein. Bewusst nur Dark Mode für optimale Lesbarkeit und Konsistenz.</div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer container">
+      <span>© 2025 Windows Privacy</span>
+      <span class="dot">•</span>
+      <a href="impressum.html" class="muted">Impressum</a>
+      <span class="dot">•</span>
+      <a href="datenschutz.html" class="muted">Datenschutz</a>
+    </footer>
+
+    <script src="assets/app.js" defer></script>
+  </body>
+ </html>

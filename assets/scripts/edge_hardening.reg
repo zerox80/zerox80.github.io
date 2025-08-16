@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+; Windows Privacy - Microsoft Edge Härtung (optional)
+; Hinweis: Wirkt systemweit per Richtlinien. Anpassungen können UI-Funktionen verändern.
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge]
+"MetricsReportingEnabled"=dword:00000000
+"PersonalizationReportingEnabled"=dword:00000000
+"SearchSuggestEnabled"=dword:00000000
+"HubsSidebarEnabled"=dword:00000000
+"DisableFirstRunExperience"=dword:00000001
