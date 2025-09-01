@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>/index.html</loc></url>
+  <url><loc>/lpic-1/index.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung/tar-grundlagen.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung/kompressionsverfahren.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung/rsync-und-synchronisation.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung/backup-strategien.html</loc></url>
+  <url><loc>/lpic-1/archivierung-komprimierung/inkrementell-und-differenziell.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen/groups-und-gpasswd.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen/pam-grundlagen.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen/passwd-shadow-chage.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen/sudoers-und-visudo.html</loc></url>
+  <url><loc>/lpic-1/benutzer-gruppen/useradd-usermod-userdel.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/acl-grundlagen.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/acl-werkzeuge-getfacl-setfacl.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/chmod-chown-chgrp.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/rechte-grundlagen.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/special-bits-suid-sgid-sticky.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/umask-und-defaults.html</loc></url>
+  <url><loc>/lpic-1/berechtigungen-acls/zugriffsstrategien-und-best-practices.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/dateisystem-attribute.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/dateisystem-typen.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/dateisystem-werkzeuge.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/fhs.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/inodes-und-links.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/labels-und-uuid.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/mount-optionen-und-sicherheit.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/mount-und-fstab.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/partitionen-und-swap.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/quotas.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/speicheranalyse.html</loc></url>
+  <url><loc>/lpic-1/dateisysteme-fhs/tmpfs-und-bind-mounts.html</loc></url>
+
+  <url><loc>/search.html</loc></url>
+
+  <url><loc>/lpic-1/glossar.html</loc></url>
+
+  <url><loc>/lpic-1/lernplan.html</loc></url>
+
+  <url><loc>/lpic-1/fortschritt.html</loc></url>
+</urlset>

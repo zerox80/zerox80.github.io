@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Unix-Philosophie – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Unix-Philosophie – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a> · Unix-Philosophie</div>
+<h2>Unix-Philosophie</h2>
+<p class="muted">Kleine Werkzeuge, Text als API, Komposition und Transparenz.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a class="active" href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a class="active" href="unix-philosophie.html">Unix-Philosophie</a>
+<a href="hilfesysteme-man-info.html">Hilfe-Systeme</a>
+<a href="editoren-vi-nano.html">Editoren: vi &amp; nano</a>
+<a href="dateien-pfade-globbing.html">Dateien, Pfade &amp; Globbing</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Prinzipien</h3><div class="card-body">
+<ul>
+<li>Kleine Programme, ein Zweck.</li>
+<li>Text als universelle Schnittstelle.</li>
+<li>Komposition über Pipes, Filter und klare Ausgaben.</li>
+<li>Transparenz: einfache Tools, weniger Magie.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Beispiele</h3><div class="card-body">
+<pre><code># Top Talkers im Netzwerk-Log
+awk '{print $1}' access.log | sort | uniq -c | sort -nr | head
+
+# Systemzustand zusammenfassen
+printf 'Uptime: '; uptime
+echo 'Top RAM Prozesse:'; ps -eo pid,comm,%mem --sort=-%mem | head
+</code></pre>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Warum ist Text als API mächtig?</li>
+<li>Nenne zwei Vorteile kleiner, spezialisierter Programme.</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="hilfesysteme-man-info.html" rel="prev">← Vorherige Seite</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

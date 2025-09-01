@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>initramfs &amp; dracut – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="initramfs &amp; dracut – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../systemstart-boot.html">Systemstart &amp; Boot</a> · initramfs &amp; dracut</div>
+<h2>initramfs &amp; dracut</h2>
+<p class="muted">Frühphase des Bootens: Module, Root-Findung und Reparatur.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a class="active" href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="bootprozess-bios-uefi.html">Bootprozess BIOS/UEFI</a>
+<a href="grub-und-grub2.html">GRUB/GRUB2</a>
+<a href="systemd-targets-runlevels.html">systemd-Targets &amp; Runlevels</a>
+<a class="active" href="initramfs-dracut.html">initramfs &amp; dracut</a>
+<a href="notfallrettung-und-rescue.html">Notfallrettung &amp; Rescue</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>Rolle des initramfs verstehen.</li>
+<li>Initramfs regenerieren (dracut/mkinitcpio/update-initramfs).</li>
+<li>Debugging und Drop-to-Shell.</li>
+</ul></div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body">
+<pre><code># Regenerieren (distributionabhängig)
+sudo dracut --force /boot/initramfs-$(uname -r).img $(uname -r)
+sudo update-initramfs -u -k all
+sudo mkinitcpio -P
+
+# Debug
+lsinitrd /boot/initramfs-$(uname -r).img | less
+</code></pre>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Wofür wird initramfs benötigt?</li>
+<li>Wie prüfst du den Inhalt eines initramfs?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Bootprozess, Bootloader, systemd.</p>
+<pre><code># systemd Grundbefehle
+systemctl status ssh
+systemctl enable --now ssh
+systemctl list-units --type=service
+journalctl -u ssh --since 'today'
+
+# Bootloader
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo grub-install /dev/sda
+
+# Rescue &amp; Notfall
+systemctl rescue
+systemctl emergency
+rd.break   # im Kernel-Commandline zum Reset des root-Passworts
+</code></pre>
+<ul><li>Initramfs enthält Treiber und Tools zum Mounten des Root-FS. Bei Kernel/Storage-Änderungen neu erstellen (<code>update-initramfs</code>, <code>dracut -f</code>).</li><li>Targets ersetzen klassische Runlevels (graphical, multi-user, rescue, emergency).</li></ul>
+<h4>Fehlerbilder</h4><ul><li>Drop in initramfs‑Shell → fehlender Treiber/UUID. Prüfe <code>/etc/fstab</code> und regeneriere initramfs.</li><li>GRUB landet in prompt → <code>grub.cfg</code> defekt; via Live‑ISO neu installieren.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>systemctl</code></td><td>start/stop/status; enable/disable; is-enabled; list-units --type=service</td></tr>
+<tr><td><code>journalctl</code></td><td>-u UNIT; -b Boot; --since; -f follow</td></tr>
+<tr><td><code>grub</code></td><td>grub-mkconfig -o /boot/grub/grub.cfg; grub-install /dev/sdX</td></tr>
+<tr><td><code>initramfs</code></td><td>update-initramfs -u (Debian/Ubuntu); dracut -f (RHEL/Fedora)</td></tr>
+<tr><td><code>kernel-cmdline</code></td><td>rd.break, systemd.unit=emergency.target, root=UUID=...</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Dienst startet nicht nach Update: systemctl status + journalctl -u + ExecStart prüfen.</li>
+<li>GRUB‑Recovery nach Plattenwechsel: grub-install + grub-mkconfig.</li>
+<li>Initramfs‑Drop (unable to find root fs): UUID in /etc/fstab fixen und neu generieren.</li>
+<li>Headless‑Server in Rescue/Single‑User zur Passwortrettung (rd.break).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Unit aktiv? (systemctl status)</li>
+<li>Logs mit Kontext? (journalctl -u --since '1h')</li>
+<li>GRUB‑Konfig aktuell? (grub-mkconfig)</li>
+<li>initramfs passend zur Hardware? (dracut/update-initramfs)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Dienst startet nicht nach Update: systemctl status + journalctl -u + ExecStart prüfen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>GRUB‑Recovery nach Plattenwechsel: grub-install + grub-mkconfig. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Initramfs‑Drop (unable to find root fs): UUID in /etc/fstab fixen und neu generieren. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Headless‑Server in Rescue/Single‑User zur Passwortrettung (rd.break). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># systemd, GRUB, initramfs
+systemctl enable --now ssh
+journalctl -u ssh --since 'today'
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo grub-install /dev/sda
+sudo dracut -f        # RHEL/Fedora
+sudo update-initramfs -u   # Debian/Ubuntu</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="grub-und-grub2.html" rel="prev">← Vorherige Seite</a> · <a href="notfallrettung-und-rescue.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

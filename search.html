@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Suche</title>
+<link href="assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="assets/js/main.js"></script>
+<meta content="Suche" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>ZeroX</h1>
+<nav class="top-nav">
+<a href="index.html">Start</a>
+<a href="lpic-1/index.html">LPIC-1</a>
+<a href="lpic-2/index.html">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="search.html">Suche</a><a href="lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="index.html">Start</a> ▸ <a href="lpic-1/index.html">LPIC‑1</a> ▸ Suche</div>
+<h2>Suche</h2>
+<div class="card"><div class="card-body">
+<p>Suche in allen Seiten dieses Kurses. Tipp: Such nach Befehlen (<code>chmod</code>), Themen (<code>ACL</code>) oder Fehlern (<code>permission denied</code>).</p>
+<input id="q" placeholder="Suchbegriff..." style="width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:12px" type="search"/>
+<div id="results"></div>
+<script>
+(async function(){
+  const res = await fetch('assets/search-index.json');
+  const idx = await res.json();
+  const q = document.getElementById('q');
+  const list = document.getElementById('results');
+  function esc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function hi(text, term){
+    if(!term) return text;
+    const re = new RegExp('(' + esc(term) + ')','ig');
+    return text.replace(re,'<mark>$1</mark>');
+  }
+  function render(items, term) {
+    list.innerHTML='';
+    items.slice(0,80).forEach(it => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = '<div class="card-body">'
+        + '<a href="' + it.url + '"><strong>' + hi(it.title, term) + '</strong></a>'
+        + '<p class="muted">' + (it.headings || []).map(h=>hi(h, term)).join(' • ') + '</p>'
+        + '<p>' + hi(it.excerpt || '', term) + '</p>'
+        + '</div>';
+      list.appendChild(el);
+    });
+  }
+  function score(it, term) {
+    term = term.toLowerCase(); let s=0;
+    if ((it.title||'').toLowerCase().includes(term)) s+=8;
+    (it.headings||[]).forEach(h => { if (h.toLowerCase().includes(term)) s+=3; });
+    if ((it.excerpt||'').toLowerCase().includes(term)) s+=1;
+    return s;
+  }
+  function searchNow() {
+    const term = q.value.trim();
+    if (!term) { list.innerHTML=''; return; }
+    const items = idx.map(it => [score(it, term), it]).filter(([s,_]) => s>0).sort((a,b)=>b[0]-a[0]).map(([_,it])=>it);
+    render(items, term);
+  }
+  q.addEventListener('input', searchNow);
+  document.addEventListener('keydown', e => { if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }});
+  const params = new URLSearchParams(location.search);
+  if (params.get('q')) { q.value = params.get('q'); searchNow(); }
+})();
+</script>
+</div></div>
+</main>
+</body>
+</html>

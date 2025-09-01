@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Archivierung &amp; Komprimierung – LPIC‑1</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Archivierung &amp; Komprimierung – LPIC‑1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a class="active" href="./index.html">LPIC-1</a>
+<a class="disabled" href="#">LPIC-2</a>
+<a class="disabled" href="#">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="./index.html">LPIC‑1</a> ▸ Archivierung &amp; Komprimierung</div>
+<h2>Archivierung &amp; Komprimierung</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>LPIC‑1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="paketverwaltung.html">Paketverwaltung</a>
+<a href="prozesse.html">Prozesse &amp; Systemd</a>
+<a href="benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="shells-scripting.html">Shells &amp; Scripting</a>
+<a class="active" href="archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body">
+<ul>
+<li><strong>Archivierung mit tar:</strong> Archive erstellen, entpacken, auflisten, Teil‑Extraktion und Kompressions‑Pipelines.</li>
+<li><strong>Kompressionsverfahren:</strong> gzip, bzip2, xz, zstd – Stärken/Schwächen, Speed vs. Ratio.</li>
+<li><strong>Integrität &amp; Metadaten:</strong> Besitzer, Rechte, Zeiten, ACLs/XATTRs bewahren; Prüfsummen validieren.</li>
+<li><strong>Backup‑Strategien:</strong> Voll, inkrementell, differenziell; Rotation, Aufbewahrung, Ausschlüsse.</li>
+<li><strong>Best Practices:</strong> Restore‑Tests, Verschlüsselung, sichere Defaults, Automatisierung.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code># tar – Basics
+# c=create, x=extract, t=list, v=verbose, f=file, z=gzip, j=bzip2, J=xz
+
+# Archiv erstellen (ohne Kompression)
+ tar -cvf backup.tar /etc /home/user
+# Archiv mit gzip/xz
+ tar -czvf etc.tgz /etc
+ tar -cJvf etc.txz /etc
+# Inhalt anzeigen
+ tar -tvf etc.tgz | less
+# Teil-Extraktion (nur /etc/ssh)
+ tar -xvf etc.tgz etc/ssh -C /restore
+
+# Parallelisierung (GNU tar + pigz/pxz)
+ tar -cf - /data | pigz &gt; data.tgz
+ pigz -dc data.tgz | tar -x -C /restore
+
+# zip
+ zip -r site.zip public/
+ unzip -l site.zip
+ unzip site.zip -d out/
+
+# gzip/bzip2/xz/zstd direkt
+ gzip -k file   # schnell
+ bzip2 -k file  # bessere Ratio, langsamer
+ xz -k file     # sehr gute Ratio, langsam
+ zstd -k file   # sehr schnell, gute Ratio
+
+# Prüfsummen
+ sha256sum file &gt; file.sha256
+ sha256sum -c file.sha256
+
+# Ausschlüsse
+ tar -czvf home.tgz /home \
+   --exclude='*.cache' \
+   --exclude-from=/root/backup.exclude
+
+# Rechte/ACLs/XATTRs
+ tar -czvf etc.tgz /etc --xattrs --acls --numeric-owner
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol class="exercise-steps">
+<li>Erstelle ein <strong>Vollbackup</strong> von <code>/etc</code> nach <code>/tmp/etc.tgz</code> (inkl. ACLs/XATTRs).</li>
+<li>Lege ein <strong>inkrementelles Backup</strong> für <code>/var/www</code> an (Basis‑Snapshot + 1 Inkrement).</li>
+<li>Stelle gezielt <strong>nur</strong> <code>/etc/ssh/sshd_config</code> in <code>/tmp/restore</code> wieder her.</li>
+<li>Validiere deine Backups über <strong>Prüfsummen</strong> und <strong>Probe‑Restore</strong>.</li>
+</ol>
+<details class="solution"><summary>Lösungen anzeigen</summary><div class="admonition note"><div class="admonition-title">Beispiel‑Lösungen</div><div class="admonition-body"><pre><code># 1) Vollbackup /etc mit Metadaten
+mkdir -p /tmp
+sudo tar -czvf /tmp/etc.tgz /etc --xattrs --acls --numeric-owner
+
+# 2) Inkrementelles Backup /var/www
+# Basis‑Snapshot
+sudo tar --listed-from=/tmp/www.snar -czvf /tmp/www-full.tgz /var/www
+# Inkrement 1 (nach Änderungen)
+sudo tar --listed-from=/tmp/www.snar -czvf /tmp/www-inc1.tgz /var/www
+
+# 3) Teil‑Restore nur sshd_config
+mkdir -p /tmp/restore
+sudo tar -xvf /tmp/etc.tgz etc/ssh/sshd_config -C /tmp/restore
+
+# 4) Prüfsummen
+sha256sum /tmp/etc.tgz /tmp/www-full.tgz /tmp/www-inc1.tgz &gt; /tmp/backup.sha256
+sha256sum -c /tmp/backup.sha256
+</code></pre></div></div></details>
+</div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz">
+<div class="quiz-question">Welche Aussagen sind korrekt? (Mehrfachauswahl möglich)</div>
+<div class="quiz-options">
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span><code>xz</code> komprimiert in der Regel besser als <code>gzip</code>, ist aber langsamer.</span></label>
+<label class="quiz-option" data-correct="0"><input type="checkbox"/> <span><code>tar -czf</code> bewahrt niemals Besitzer/ACLs.</span></label>
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span>Mit <code>--listed-from</code> lassen sich inkrementelle Backups erstellen.</span></label>
+<label class="quiz-option" data-correct="0"><input type="checkbox"/> <span><code>zip</code> ist immer schneller als <code>zstd</code>.</span></label>
+</div>
+<div class="quiz-actions">
+<button class="btn check-quiz">Prüfen</button>
+<button class="btn reset-quiz">Zurücksetzen</button>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Nenne Vor‑ und Nachteile von <code>gzip</code>, <code>bzip2</code>, <code>xz</code>, <code>zstd</code>.</li>
+<li>Erkläre den Unterschied zwischen <em>inkrementell</em> und <em>differenziell</em> an einem Beispiel.</li>
+<li>Wie stellst du sicher, dass <strong>ACLs</strong> und <strong>XATTRs</strong> im Backup enthalten sind?</li>
+<li>Warum sind <strong>Restore‑Tests</strong> wichtig und wie führst du sie minimal durch?</li>
+</ol></div></div>
+<div class="card block"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="archivierung-komprimierung/tar-grundlagen.html">tar-Grundlagen</a>
+<a href="archivierung-komprimierung/kompressionsverfahren.html">Kompressionsverfahren</a>
+<a href="archivierung-komprimierung/rsync-und-synchronisation.html">rsync &amp; Synchronisation</a>
+<a href="archivierung-komprimierung/backup-strategien.html">Backup-Strategien</a>
+<a href="archivierung-komprimierung/inkrementell-und-differenziell.html">Inkrementell &amp; Differenziell</a>
+</nav></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

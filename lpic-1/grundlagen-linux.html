@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Grundlagen &amp; Philosophien – LPIC‑1</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Grundlagen &amp; Philosophien – LPIC‑1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a class="active" href="./index.html">LPIC-1</a>
+<a class="disabled" href="#">LPIC-2</a>
+<a class="disabled" href="#">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="./index.html">LPIC‑1</a> ▸ Grundlagen &amp; Philosophien</div>
+<h2>Grundlagen &amp; Philosophien</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>LPIC‑1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a class="active" href="grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="paketverwaltung.html">Paketverwaltung</a>
+<a href="prozesse.html">Prozesse &amp; Systemd</a>
+<a href="benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="shells-scripting.html">Shells &amp; Scripting</a>
+<a href="archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Lernziele</h3>
+<div class="card-body">
+<ul>
+<li>Die Unix‑Philosophie verstehen: kleine Werkzeuge, Text als Schnittstelle, Pipes und Komposition.</li>
+<li>Linux im Überblick: Kernel vs. Distribution, Paketformate (deb/rpm), Release‑Zyklen (LTS, Rolling).</li>
+<li>Shell‑Grundlagen sicher anwenden: Navigation, Globbing, I/O‑Umleitung, Quotes.</li>
+<li>Hilfe‑Systeme effektiv nutzen: man, info, --help, tldr und Beispiele finden.</li>
+<li>Datei‑ und Prozesssicht: „Alles ist eine Datei“, Pseudo‑FS <code>/proc</code> und <code>/sys</code>, Exit‑Codes.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Einführung: Was ist Linux?</h3>
+<div class="card-body">
+<p>Linux ist ein Kernel – das Herzstück eines Betriebssystems. Eine <em>Distribution</em> bündelt diesen Kernel mit Paketen (Programmen, Bibliotheken, Tools), einem Paketmanager, Voreinstellungen und Supportzyklen. Beispiele: Debian/Ubuntu (DEB), RHEL/AlmaLinux/Fedora (RPM), Arch (Rolling Release).</p>
+<p>Wichtige Abgrenzung: <strong>Kernel</strong> steuert Hardware, Speicher und Prozesse. <strong>Userland</strong> (GNU‑Tools, Shells, Anwendungen) liefert den Werkzeugkasten für Administratoren und Nutzer.</p>
+<p>Linux folgt der Idee: „<strong>Alles ist eine Datei</strong>“. Geräte (<code>/dev</code>), Prozesse (<code>/proc</code>), Kernel‑Parameter (<code>/sys</code>), Sockets und Pipes – alles lässt sich wie Dateien behandeln: öffnen, lesen, schreiben.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Unix‑Philosophie in der Praxis</h3>
+<div class="card-body">
+<ul>
+<li><strong>Kleine Programme, ein Zweck:</strong> Tools lösen genau eine Aufgabe gut (z. B. <code>grep</code> sucht, <code>sort</code> sortiert).</li>
+<li><strong>Text als API:</strong> Tools sprechen „Plain Text“. Dadurch lassen sie sich frei kombinieren.</li>
+<li><strong>Komposition via Pipes:</strong> Mit <code>|</code> verbindest du Werkzeuge zu mächtigen Ein‑Zeiler‑Pipelines.</li>
+</ul>
+<p>Beispiel: Finde die 10 Prozesse mit dem größten RAM‑Verbrauch:</p>
+<pre><code>ps aux | sort -k 4 -nr | head -n 10
+</code></pre>
+<p>Beispiel: Zähle häufigste IPs in einer Weblog‑Datei:</p>
+<pre><code>awk '{print $1}' access.log | sort | uniq -c | sort -nr | head
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Shell‑Grundlagen</h3>
+<div class="card-body">
+<h4>Navigation &amp; Auflisten</h4>
+<pre><code>pwd                 # aktuelles Verzeichnis
+cd /etc            # wechsle nach /etc
+ls -la             # detaillierte Liste inkl. versteckter Dateien
+tree -L 2          # (optional) Verzeichnisbaum, Tiefe 2
+</code></pre>
+<h4>Globbing &amp; Quotes</h4>
+<pre><code>ls *.log            # alle .log Dateien
+echo "Hallo $USER"   # Double Quotes: Variablenersetzung
+echo 'Hallo $USER'   # Single Quotes: wortwörtlich, keine Ersetzung
+echo Datei_{A,B}.txt # Brace Expansion: Datei_A.txt, Datei_B.txt
+</code></pre>
+<h4>I/O‑Umleitung</h4>
+<pre><code>cmd &gt; out.txt       # stdout in Datei (überschreiben)
+cmd &gt;&gt; out.txt      # stdout anhängen
+cmd 2&gt; err.txt      # stderr in Datei
+cmd &gt; out.txt 2&gt;&amp;1  # stderr nach stdout umleiten
+cmd &amp;&gt; both.txt     # beides in eine Datei (Bash)
+</code></pre>
+<h4>Exit‑Codes</h4>
+<p>Jeder Befehl liefert einen Status zurück. <code>0</code> bedeutet Erfolg, alles andere Fehler. Prüfen mit <code>echo $?</code>.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Hilfe‑Systeme</h3>
+<div class="card-body">
+<pre><code>man ls              # Manual‑Seite
+man 5 fstab        # Abschnitt 5 (Dateiformate) für fstab
+info coreutils      # Info‑System (navigierbar)
+ls --help          # Kurzinfo
+apropos mount      # Suchbegriff in Man‑Page‑Datenbank
+whatis passwd      # Einzeilige Beschreibung
+# Optional: tldr (falls installiert)
+tldr tar           # Praxisnahe Beispiele
+</code></pre>
+<p>Tipp: In man‑Pages mit <code>/Suchbegriff</code> suchen, mit <code>n</code> zum nächsten Treffer springen, <code>q</code> beendet.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Wichtige Konzepte kompakt</h3>
+<div class="card-body">
+<ul>
+<li><strong>Dateisystem‑Hierarchie:</strong> Lies die Übersicht in <code>dateisysteme-fhs.html</code>. Merke: <code>/etc</code> Konfiguration, <code>/var</code> veränderliche Daten, <code>/usr</code> Programme/Libs, <code>/home</code> Nutzerdaten.</li>
+<li><strong>Prozesse und Jobs:</strong> <code>&amp;</code> für Hintergrund, <code>jobs</code>/<code>fg</code>/<code>bg</code>. Signale mit <code>kill</code> senden (<code>SIGTERM</code>, <code>SIGKILL</code>).</li>
+<li><strong>Rechte‑Grundlagen:</strong> Eigentümer, Gruppe, andere. rwx‑Bbits, numerisch (z. B. 0644) und symbolisch (z. B. u+rw,go‑w).</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Cheatsheet</h3>
+<div class="card-body">
+<pre><code># Orientierung
+uname -a
+lsb_release -a        # ggf. Paket: lsb-release
+cat /etc/os-release
+
+# Hilfe
+man, info, --help, apropos, whatis, tldr
+which, type
+
+# Text &amp; Komposition
+cat, tac, nl, head, tail -f, less
+cut, paste, tr, sort, uniq, wc
+grep -E, sed, awk
+tee, xargs, printf, seq
+
+# Prozesse
+ps aux | less
+top / htop
+pgrep -a ssh
+kill -TERM <pid>
+</pid></code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen (mit Lösungshinweisen)</h3>
+<div class="card-body">
+<ol>
+<li>
+<p><strong>Man‑Seiten meistern:</strong> Finde die man‑Seite zu <code>chmod</code> und zeige 3 Beispiel‑Aufrufe.</p>
+<details><summary>Lösungshinweise</summary>
+<p><code>man chmod</code> öffnen. Beispiele: <code>chmod 644 file</code>, <code>chmod u+x script.sh</code>, <code>chmod g-w,o-rwx dir</code>.</p>
+</details>
+</li>
+<li>
+<p><strong>Pipes anwenden:</strong> Zeige die 10 größten Prozesse nach RAM.</p>
+<details><summary>Lösungshinweise</summary>
+<p><code>ps aux | sort -k 4 -nr | head -n 10</code>. Alternativ: <code>ps -eo pid,comm,%mem --sort=-%mem | head</code>.</p>
+</details>
+</li>
+<li>
+<p><strong>Globbing und Quotes:</strong> Erkläre den Unterschied zwischen <code>""</code> und <code>''</code> in der Shell und gib je ein Beispiel.</p>
+<details><summary>Lösungshinweise</summary>
+<p>Double Quotes erlauben Variablenersetzung (<code>echo "Hallo $USER"</code>), Single Quotes nicht (<code>echo 'Hallo $USER'</code>).</p>
+</details>
+</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen (Kurzcheck)</h3>
+<div class="card-body">
+<ol>
+<li>Was bedeutet „Alles ist eine Datei“ – nenne drei Beispiele aus <code>/dev</code>, <code>/proc</code> oder <code>/sys</code>.</li>
+<li>Erkläre den Unterschied zwischen Kernel und Distribution.</li>
+<li>Wozu dienen Pipes, und wie kombinierst du <code>grep</code> und <code>sort</code> sinnvoll?</li>
+<li>Wie unterscheidet sich numerische von symbolischer Rechtevergabe?</li>
+</ol>
+</div>
+</div>
+<div class="card block"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="grundlagen-linux/unix-philosophie.html">Unix-Philosophie</a>
+<a href="grundlagen-linux/hilfesysteme-man-info.html">Hilfe-Systeme</a>
+<a href="grundlagen-linux/editoren-vi-nano.html">Editoren: vi &amp; nano</a>
+<a href="grundlagen-linux/dateien-pfade-globbing.html">Dateien, Pfade &amp; Globbing</a>
+</nav></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

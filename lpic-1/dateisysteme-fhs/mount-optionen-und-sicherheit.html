@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Mount‑Optionen &amp; Sicherheit</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Mount‑Optionen &amp; Sicherheit" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Mount‑Optionen &amp; Sicherheit</div>
+<h2>Mount‑Optionen &amp; Sicherheit</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a class="active" href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>Wichtige Optionen und Sicherheitsimplikationen.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code># Häufige Optionen
+nodev,noexec,nosuid,ro,noatime,uid=,gid=,umask=
+# Beispiele (fstab)
+/dev/sdb1 /srv ext4 defaults,nodev,noexec,nosuid 0 2
+UUID=...   /media/usb vfat rw,uid=1000,gid=1000,umask=027 0 0
+</code></pre></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<ul>
+<li><strong>noexec:</strong> Verhindert das Ausführen von Binärdateien auf dem Mount. Skripte können weiterhin via Interpreter laufen.</li>
+<li><strong>nosuid:</strong> Ignoriert setuid/setgid‑Bits → reduziert Privilege‑Escalation‑Risiken.</li>
+<li><strong>nodev:</strong> Unterbindet das Anlegen/Verwenden von Device‑Files im Mount.</li>
+<li><strong>noatime/nodiratime/relatime:</strong> Steuern Zugriffszeitstempel; <code>relatime</code> ist Standard (Performance vs. Compliance).</li>
+<li><strong>ro/rw:</strong> Read‑only/Read‑write Mount; ro sinnvoll für Backups/forensische Zwecke.</li>
+<li><strong>vfat/ntfs:</strong> Keine Unix‑Rechte → <code>uid=</code>, <code>gid=</code>, <code>umask=</code> bestimmen effektive Rechte.</li>
+<li><strong>hidepid</strong> (procfs): <code>hidepid=2</code> verbirgt fremde Prozesse; <code>gid=proc</code> für Monitoring‑Gruppe.</li>
+<li><strong>systemd‑Integration:</strong> <code>x-systemd.automount</code>, <code>nofail</code>, <code>x-systemd.idle-timeout</code> verbessern Boot‑Robustheit und On‑Demand‑Mounts.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body"><pre><code># Temporär mit Sicherheitsschaltern mounten
+sudo mount -o nodev,nosuid,noexec /dev/sdb1 /srv
+
+# fstab: USB‑Stick (vfat) mit festen Besitzern
+UUID=XXXX  /media/usb  vfat  rw,uid=1000,gid=1000,umask=027,noexec,nodev,nosuid  0  0
+
+# proc absichern
+proc  /proc  proc  defaults,hidepid=2,gid=proc  0  0
+
+# Netzwerkdateisystem robust einhängen
+server:/share  /mnt/share  nfs  rw,_netdev,nofail,x-systemd.automount,x-systemd.idle-timeout=60s  0  0
+
+# atime reduzieren
+/dev/nvme0n1p3  /var  ext4  rw,relatime  0  2
+</code></pre></div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Weiche Pfade vermeiden:</strong> Für fstab nach Möglichkeit <code>UUID=</code> oder <code>LABEL=</code> nutzen.</li>
+<li><strong>Least Privilege:</strong> Für Wechseldatenträger stets <code>nodev,nosuid,noexec</code> setzen.</li>
+<li><strong>Boot‑Stabilität:</strong> Externe/NFS mit <code>nofail</code>, <code>_netdev</code> und ggf. Automount versehen.</li>
+<li><strong>Auditing:</strong> Kritische Mounts dokumentieren und regelmäßig mit <code>findmnt</code>/<code>mount</code> prüfen.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Aktive Mount‑Optionen anzeigen
+findmnt -no TARGET,OPTIONS /srv
+
+# Bind‑Mount mit noexec
+mount --bind /opt/app/bin /sandbox/bin
+mount -o remount,bind,noexec /sandbox/bin
+
+# tmpfs abgesichert
+tmpfs /run/tmpfs tmpfs rw,nosuid,nodev,mode=0755,size=256M 0 0
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Hänge ein Verzeichnis als <code>ro,nodev,nosuid,noexec</code> ein und verifiziere das Verhalten.</li>
+<li>Erzeuge einen sicheren <code>vfat</code>-Mount für einen USB‑Stick mit umask/uid/gid.</li>
+<li>Setze <code>hidepid=2</code> für <code>/proc</code> und teste mit einem Nicht‑Privilegierten Benutzer.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welche Risiken mitigiert <code>nosuid</code> und wo ist es wirkungslos?</li>
+<li>Worin unterscheiden sich <code>noatime</code> und <code>relatime</code> praktisch?</li>
+<li>Wie stellst du sicher, dass fehlende Netzwerk‑Shares den Boot nicht blockieren?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="labels-und-uuid.html" rel="prev">← Vorherige Seite</a> · <a href="mount-und-fstab.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

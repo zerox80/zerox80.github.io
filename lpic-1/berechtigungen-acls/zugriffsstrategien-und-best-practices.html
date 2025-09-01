@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Zugriffsstrategien &amp; Best Practices</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Zugriffsstrategien &amp; Best Practices" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a> ▸ Best Practices</div>
+<h2>Zugriffsstrategien &amp; Best Practices</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="rechte-grundlagen.html">Rechte‑Grundlagen</a>
+<a href="chmod-chown-chgrp.html">chmod, chown, chgrp</a>
+<a href="umask-und-defaults.html">umask &amp; Defaults</a>
+<a href="special-bits-suid-sgid-sticky.html">Special Bits (suid/sgid/sticky)</a>
+<a href="acl-grundlagen.html">ACL‑Grundlagen</a>
+<a href="acl-werkzeuge-getfacl-setfacl.html">ACL‑Werkzeuge</a>
+<a class="active" href="zugriffsstrategien-und-best-practices.html">Best Practices</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>Sichere Standardrechte definieren.</li><li>Teams und Projekte sinnvoll strukturieren.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code># Projektstruktur
+mkdir -p /srv/proj/{data,bin}
+chgrp -R proj /srv/proj
+chmod 2775 /srv/proj/data   # g+s
+setfacl -m d:g:proj:rwx /srv/proj/data
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Lege ein Projektverzeichnis mit Gruppenzugehörigkeit an.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Wann ist g+s auf Verzeichnissen sinnvoll?</li></ol></div></div>
+<div class="card block"><h3>Theorie &amp; Strategien</h3><div class="card-body">
+<ul>
+<li><strong>Least Privilege:</strong> Nur notwendige Rechte gewähren (Datei‑, Verzeichnis‑, Ausführungsrechte).</li>
+<li><strong>Gruppenbasiert statt benutzerbasiert:</strong> Rollen über Gruppen abbilden; vermeidet Einzel‑Sonderfälle.</li>
+<li><strong>Trennung von Daten &amp; Code:</strong> Schreibrechte für App‑Daten, aber nur Lese‑/Ausführungsrechte für Deploy‑Artefakte.</li>
+<li><strong>Standardrechte steuern:</strong> <code>umask</code> und Default‑ACLs definieren (z. B. Team‑Shares).</li>
+<li><strong>Vererbung via g+s &amp; Default‑ACLs:</strong> Konsistente Gruppenzugehörigkeit und Startberechtigungen in Teamordnern.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Rollen &amp; Gruppenmodell</h3><div class="card-body">
+<p>Beispielhafte Rollen: <em>owner</em>, <em>maintainer</em>, <em>developer</em>, <em>viewer</em>. Diese werden Gruppen zugeordnet und über ACLs feinjustiert.</p>
+<pre><code># Gruppen anlegen
+groupadd proj-admins
+groupadd proj-dev
+groupadd proj-read
+
+# Projektbasis
+install -d -m 2775 -o root -g proj-admins /srv/proj
+install -d -m 2775 -o root -g proj-dev    /srv/proj/data
+install -d -m 2775 -o root -g proj-read   /srv/proj/docs
+
+# ACL-Default für Vererbung
+setfacl -R -m d:g:proj-admins:rwx /srv/proj
+setfacl -R -m d:g:proj-dev:rwx    /srv/proj/data
+setfacl -R -m d:g:proj-read:rx    /srv/proj/docs
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Umask &amp; Defaultrechte Policy</h3><div class="card-body">
+<ul>
+<li><strong>Service‑Kontexte:</strong> systemd‑Services mit restriktiver <code>UMask=0077</code> in Unit‑Dateien.</li>
+<li><strong>User‑Shells:</strong> Standard <code>umask 002</code> in kollaborativen Teams (Gruppenschreibrechte), ansonsten <code>022</code>.</li>
+<li><strong>Team‑Shares:</strong> Default‑ACLs nutzen statt nur <code>umask</code>, um konsistente Gruppenrechte zu erzwingen.</li>
+</ul>
+<pre><code># systemd Override
+systemctl edit myapp.service
+[Service]
+UMask=0077
+            </code></pre>
+</div></div>
+<div class="card block"><h3>ACL‑Patterns (POSIX)</h3><div class="card-body">
+<ul>
+<li><strong>Team‑Ordner:</strong> Default‑ACLs für Gruppen schalten Vererbung ein.</li>
+<li><strong>Externe Zugriffe:</strong> Temporäre, enge ACLs für Audits oder Support; Ablaufdatum dokumentieren.</li>
+<li><strong>Mask beachten:</strong> Die <em>mask</em> begrenzt die effektiven Gruppen‑/Benutzer‑ACLs.</li>
+</ul>
+<pre><code># Team-Ordner mit Default-ACLs
+setfacl -m g:proj-dev:rwx /srv/proj/data
+setfacl -m d:g:proj-dev:rwx /srv/proj/data
+
+# Leserolle
+setfacl -m g:proj-read:rx  /srv/proj/docs
+setfacl -m d:g:proj-read:rx /srv/proj/docs
+
+# Effektive Rechte anzeigen
+getfacl /srv/proj/data
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Special Bits sinnvoll einsetzen</h3><div class="card-body">
+<ul>
+<li><strong>setgid auf Verzeichnissen (g+s):</strong> Neue Dateien erben die Gruppen‑ID → konsistente Team‑Besitzverhältnisse.</li>
+<li><strong>sticky bit auf gemeinsam genutzten Ordnern:</strong> <code>/tmp</code>‑ähnliches Verhalten: Nur Eigentümer darf löschen.</li>
+<li><strong>SUID/SGID BINARIES:</strong> Streng minimieren, regelmäßig auditieren (<code>find / -perm -4000 -o -perm -2000</code>).</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Service‑ &amp; Systemkonten</h3><div class="card-body">
+<ul>
+<li>Dedizierte Benutzer/Gruppen pro Dienst, keine geteilten Konten.</li>
+<li>Datei‑ und Verzeichnisrechte für Runtime‑Daten separieren (<code>/var/lib/app</code>, <code>/var/log/app</code>).</li>
+<li>Mit <code>ReadOnlyPaths=</code>, <code>ReadWritePaths=</code>, <code>ProtectSystem=strict</code> in systemd weiter einschränken.</li>
+</ul>
+<pre><code># systemd Härtung (Ausschnitt)
+[Service]
+ProtectSystem=strict
+ReadWritePaths=/var/lib/myapp /var/log/myapp
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Auditing &amp; Nachvollziehbarkeit</h3><div class="card-body">
+<ul>
+<li><strong>Rechteinventar:</strong> Regelmäßig <code>getfacl -R</code> sichern; Änderungen per Versionskontrolle tracken.</li>
+<li><strong>Auditd/Journal:</strong> Kritische Pfade überwachen (<code>auditctl -w /srv/proj -p wa -k proj</code>).</li>
+<li><strong>Finde Abweichungen:</strong> <code>find</code> für zu weite Rechte, SUID/SGID, Welt‑schreibbare Dateien.</li>
+</ul>
+<pre><code># Backups der ACLs
+getfacl -R /srv/proj &gt; /root/acl-backup.srv-proj
+
+# Suche potenziell gefährliche Rechte
+find /srv/proj -type f -perm -o+w -ls
+find / -xdev \( -perm -4000 -o -perm -2000 \) -ls
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body">
+<ul>
+<li><strong>ACL mask greift:</strong> Effektivrechte kleiner als erwartet → <code>setfacl -m m:rwx</code> anpassen (vorsichtig, dokumentieren).</li>
+<li><strong>Falsche Gruppenerben:</strong> <code>chmod g+s</code> auf Eltern‑Verzeichnis vergessen.</li>
+<li><strong>Umask überschreibt Erwartungen:</strong> Shell/Service‑Kontext prüfen, ggf. Default‑ACLs nutzen.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Erweiterte Übungen</h3><div class="card-body">
+<ol class="exercise-steps">
+<li>Implementiere ein dreistufiges Rollenmodell (admin/dev/read) für <code>/srv/projX</code> inkl. Default‑ACLs.</li>
+<li>Härten einen gemeinsam genutzten Upload‑Ordner mit <code>sticky</code>, <code>g+s</code> und restriktiven Default‑ACLs.</li>
+<li>Richte ein Audit auf <code>/srv/projX/data</code> ein und belege Änderungen mit Logs.</li>
+</ol>
+<details class="solution"><summary>Lösungshinweise</summary><pre><code># Rollen
+groupadd px-admins; groupadd px-dev; groupadd px-read
+install -d -m 2775 -o root -g px-admins /srv/projX
+install -d -m 2775 -o root -g px-dev    /srv/projX/data
+setfacl -m g:px-admins:rwx /srv/projX
+setfacl -m d:g:px-admins:rwx /srv/projX
+setfacl -m g:px-dev:rwx /srv/projX/data
+setfacl -m d:g:px-dev:rwx /srv/projX/data
+setfacl -m g:px-read:rx /srv/projX
+setfacl -m d:g:px-read:rx /srv/projX
+
+# Upload-Ordner
+install -d -m 1770 -o root -g px-dev /srv/projX/upload
+setfacl -m d:g:px-dev:rwx /srv/projX/upload
+            </code></pre></details>
+</div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz" id="quiz-acl-bp-1">
+<div class="quiz-question">Wodurch erzielst du konsistente Gruppenzugehörigkeit neuer Dateien in Teamordnern?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qbp1" type="radio"/> umask 000</label>
+<label class="quiz-option" data-correct="1"><input name="qbp1" type="radio"/> setgid auf dem Verzeichnis und Default‑ACLs</label>
+<label class="quiz-option"><input name="qbp1" type="radio"/> nur chmod 775</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+<div class="quiz" id="quiz-acl-bp-2">
+<div class="quiz-question">Welche Aussage zur ACL‑<em>mask</em> trifft zu?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qbp2" type="radio"/> Sie erhöht Gruppenrechte über Owner hinaus</label>
+<label class="quiz-option" data-correct="1"><input name="qbp2" type="radio"/> Sie begrenzt effektive Rechte für Gruppen/Named‑User‑Einträge</label>
+<label class="quiz-option"><input name="qbp2" type="radio"/> Sie gilt nur für Verzeichnisse</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+<div class="card block"><h3>Checkliste (Policy)</h3><div class="card-body">
+<ul>
+<li><strong>Gruppen vor Benutzern?</strong> Rollenkonzept dokumentiert.</li>
+<li><strong>g+s &amp; Default‑ACLs?</strong> Teamordner korrekt vererbend konfiguriert.</li>
+<li><strong>Umask/Service‑UMask?</strong> Kontextspezifisch gesetzt und geprüft.</li>
+<li><strong>Audits vorhanden?</strong> ACL‑Backups, auditd‑Regeln, regelmäßige Prüfungen.</li>
+<li><strong>SUID/SGID geprüft?</strong> Minimiert und inventarisiert.</li>
+</ul>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>chmod</code></td><td>symbolisch u/g/o/a,+/-/=(rwxXst); oktal 0–7; --reference=DATEI</td></tr>
+<tr><td><code>chown</code></td><td>USER[:GRUPPE] DATEI; -R rekursiv; --from prüfen</td></tr>
+<tr><td><code>chgrp</code></td><td>GRUPPE DATEI; -R rekursiv</td></tr>
+<tr><td><code>setfacl</code></td><td>-m u:NAME:rwX g:GRUPPE:r--; -x Eintrag löschen; -b alle ACLs löschen; -d Default-ACL</td></tr>
+<tr><td><code>getfacl</code></td><td>Effektive Rechte &amp; Mask anzeigen</td></tr>
+<tr><td><code>umask</code></td><td>Basis 666/777; mask subtrahiert Bits; häufig 022 oder 027</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX).</li>
+<li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen.</li>
+<li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD).</li>
+<li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Ownership korrekt? (ls -l)</li>
+<li>U/G/O‑Rechte passend? (chmod)</li>
+<li>ACLs vorhanden &amp; Mask? (getfacl)</li>
+<li>Sonderbits sinnvoll? (suid/sgid/sticky)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Rechte &amp; ACLs
+umask 027
+chmod u=rw,g=r,o= datei
+chown alice:proj datei
+chmod g+s /srv/proj    # sgid
+chmod o+t /shared      # sticky
+setfacl -m u:alice:rw- -m g:proj:rwX ordner
+getfacl ordner</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="umask-und-defaults.html" rel="prev">← Vorherige Seite</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

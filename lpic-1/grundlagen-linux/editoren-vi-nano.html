@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Editoren: vi &amp; nano – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Editoren: vi &amp; nano – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a> · Editoren</div>
+<h2>Editoren: vi &amp; nano</h2>
+<p class="muted">Schnelle Navigation, Suchen/Ersetzen und Basics in den Standard-Editoren.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a class="active" href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="unix-philosophie.html">Unix-Philosophie</a>
+<a href="hilfesysteme-man-info.html">Hilfe-Systeme</a>
+<a class="active" href="editoren-vi-nano.html">Editoren: vi &amp; nano</a>
+<a href="dateien-pfade-globbing.html">Dateien, Pfade &amp; Globbing</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>vi(m) Basics</h3><div class="card-body">
+<pre><code># Modi
+ESC      # Normalmodus
+i        # Insert
+:wq      # speichern &amp; beenden
+u        # Undo
+dd       # Zeile löschen
+yy / p   # kopieren / einfügen
+/%s/foo/bar/g   # globales Ersetzen
+</code></pre>
+</div></div>
+<div class="card block"><h3>Vim Navigation &amp; Objekte</h3><div class="card-body">
+<pre><code># Sprünge
+w / b      # wortweise vor / zurück
+e / ge     # zum Wortende vor / zurück
+f{x} / t{x}   # bis/zum Zeichen x in der Zeile
+G / gg     # zum Dateiende / -anfang
+{ / }      # Absatzweise
+
+# Zahlen als Multiplikator
+3w         # 3 Wörter vor
+5dd        # 5 Zeilen löschen
+
+# Textobjekte (im Normal-/Operator-Pending-Mode)
+diw        # Wortinhalt löschen
+ci"        # Inhalt in "..." ändern
+da)        # Klammerausdruck + Klammern löschen
+</code></pre>
+<p class="muted">Merke: Operator (z. B. <code>d</code>, <code>c</code>, <code>y</code>) + Bewegung (z. B. <code>w</code>, <code>$</code>) = Aktion.</p>
+</div></div>
+<div class="card block"><h3>Vim Suchen &amp; Ersetzen</h3><div class="card-body">
+<pre><code># Suchen vorwärts/rückwärts
+/muster    # vorwärts
+?muster    # rückwärts
+n / N      # nächstes / vorheriges Vorkommen
+
+# Ersetzen (global)
+:%s/alt/neu/g          # gesamte Datei
+:%s/alt/neu/gc         # mit Bestätigung
+:.,$s/alt/neu/g        # von aktueller Zeile bis Ende
+:'&lt;,'&gt;s/alt/neu/g      # auf visuell markierten Bereich
+
+# Regex-Beispiele
+:%s/\s\+$//           # nachgestellte Leerzeichen entfernen
+:%s/\(foo\)bar/\1_baz/g   # Gruppen &amp; Referenzen
+</code></pre>
+</div></div>
+<div class="card block"><h3>Vim Visual, Register, Makros</h3><div class="card-body">
+<pre><code># Visual-Mode
+v / V / Ctrl+v    # zeichen-/zeilen-/blockweise Markierung
+gU / gu           # Groß-/Kleinschreibung anpassen
+
+# Register ("0-9, a-z, ")
+"+y               # ins System-Clipboard (falls vorhanden)
+"ayw              # Wort in Register a yank
+"ap               # aus Register a einfügen
+
+# Makros
+qaq               # Aufnahme ins Register a starten/beenden
+@a                # Macro a ausführen
+@@                # letztes Macro wiederholen
+</code></pre>
+</div></div>
+<div class="card block"><h3>Vim Fenster, Tabs, Buffers</h3><div class="card-body">
+<pre><code># Splits &amp; Tabs
+:sp / :vsp         # horizontal / vertikal splitten
+Ctrl+w h/j/k/l     # Fokus wechseln
+:tabnew datei      # neuer Tab
+gt / gT            # Tab vor / zurück
+
+# Buffer
+:ls                # Buffers auflisten
+:b 3               # zu Buffer 3 springen
+:bd                # Buffer schließen
+</code></pre>
+</div></div>
+<div class="card block"><h3>nano Basics</h3><div class="card-body">
+<pre><code>Ctrl+O   # schreiben
+Ctrl+X   # beenden
+Ctrl+W   # suchen
+Ctrl+\   # ersetzen
+</code></pre>
+<p>
+              Nano zeigt unten Befehle an. <code>^</code> steht für <code>Ctrl</code>, <code>M-</code> für <code>Alt</code>/<code>Meta</code>.
+            </p>
+<pre><code># Navigation &amp; Markierung
+Ctrl+A / Ctrl+E   # Zeilenanfang / -ende
+Ctrl+Y / Ctrl+V   # Seite hoch / runter
+Alt+A             # Markieren starten/stoppen
+Alt+6             # Kopieren, Ctrl+K Ausschneiden, Ctrl+U Einfügen
+
+# Dateien &amp; mehrere Puffer
+Ctrl+R            # Datei einfügen
+Alt+&gt; / Alt+&lt;     # zum nächsten / vorherigen Puffer
+
+# Maus, Zeilennummern, Syntax
+Alt+M             # Maus an/aus
+Alt+N             # Zeilennummern
+Alt+Y             # Syntax-Highlighting an/aus (abhängig von Syntax-Dateien)
+</code></pre>
+</div></div>
+<div class="card block"><h3>Vim Konfiguration</h3><div class="card-body">
+<p>Basis in <code>~/.vimrc</code> (Neovim: <code>~/.config/nvim/init.vim</code>):</p>
+<pre><code>set number relativenumber
+set expandtab shiftwidth=2 tabstop=2
+set ignorecase smartcase incsearch hlsearch
+set clipboard=unnamedplus
+syntax on
+filetype plugin indent on
+</code></pre>
+<p class="muted">Hinweis: <em>modelines</em> können Sicherheitsrisiken sein (<code>:set modeline?</code> prüfen).</p>
+</div></div>
+<div class="card block"><h3>nano Konfiguration</h3><div class="card-body">
+<p>In <code>/etc/nanorc</code> (global) oder <code>~/.nanorc</code> (Benutzer):</p>
+<pre><code>set linenumbers
+set tabsize 2
+set softwrap
+set mouse
+include "/usr/share/nano/*.nanorc"   # Syntax-Definitionen laden
+</code></pre>
+</div></div>
+<div class="card block"><h3>Praxisübungen</h3><div class="card-body">
+<ol>
+<li>Öffne eine Logdatei in Vim, entferne trailing spaces und ersetze „WARN“ durch „WARNING“ mit Bestätigung.</li>
+<li>Nutze in Vim Block-Visual-Mode, um am Zeilenende ein Suffix hinzuzufügen.</li>
+<li>Erzeuge ein Vim-Makro, das Zeilen trimmt und sortiert, und führe es mehrfach aus.</li>
+<li>Öffne mehrere Dateien in Nano, navigiere zwischen Puffern und aktiviere Zeilennummern und Umbruch.</li>
+</ol>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Wie ersetzt du in Vim alle Vorkommen eines Musters in der gesamten Datei mit Bestätigung?</li>
+<li>Wofür steht in Vim die Kombination Operator + Bewegung? Nenne zwei Beispiele.</li>
+<li>Wie kopierst du in Vim in die System-Zwischenablage und fügst daraus ein?</li>
+<li>Wie aktivierst du in Nano Zeilennummern permanent?</li>
+<li>Wie öffnest du in Vim eine vertikale Teilung und wechselst den Fokus?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="dateien-pfade-globbing.html" rel="prev">← Vorherige Seite</a> · <a href="hilfesysteme-man-info.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span> Linux Lernportal</span></div></footer>
+</body>
+</html>

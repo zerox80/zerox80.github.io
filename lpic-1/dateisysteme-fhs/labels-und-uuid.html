@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Labels &amp; UUID</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Labels &amp; UUID" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Labels &amp; UUID</div>
+<h2>Labels &amp; UUID</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a class="active" href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>UUIDs/Labels auslesen und setzen.</li><li>fstab‑Einträge mit UUID/Label pflegen.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>blkid
+e2label /dev/sdb1 DATA
+tune2fs -L DATA /dev/sdb1
+# fstab mit LABEL/UUID
+UUID=xxxx-xxxx /data ext4 defaults 0 2
+LABEL=DATA   /data ext4 defaults 0 2
+</code></pre></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<ul>
+<li><strong>UUID:</strong> Eindeutiger Bezeichner eines Dateisystems oder einer Partition. Stabil gegenüber wechselnden <code>/dev/sdX</code>-Namen.</li>
+<li><strong>Label:</strong> Menschlich lesbarer Name. Kann kollidieren, sollte eindeutig innerhalb des Systems sein.</li>
+<li><strong>Wo gespeichert?</strong> In der Superblock/Metadaten des Dateisystems (ext*, XFS, Btrfs) oder Partition (GPT PARTUUID/PARTLABEL).</li>
+<li><strong>fstab-Auflösung:</strong> Kernel/systemd lösen <code>UUID=</code> und <code>LABEL=</code> via udev/blkid auf.</li>
+<li><strong>Partition vs. FS:</strong> Unterscheide <code>PARTUUID</code>/<code>PARTLABEL</code> (Partition) von <code>UUID</code>/<code>LABEL</code> (Dateisystem).</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body"><pre><code># Alle Bezeichner anzeigen
+lsblk -f
+blkid
+
+# Label setzen/ändern
+e2label /dev/sdb1 DATA         # ext2/3/4
+tune2fs -L DATA /dev/sdb1      # Alternative für ext*
+xfs_admin -L MEDIA /dev/sdb2   # XFS
+btrfs filesystem label /mnt BDATA  # Btrfs (online auf Mountpoint)
+
+# UUID anzeigen/ändern (nur wenn nötig!)
+tune2fs -l /dev/sdb1 | grep UUID
+# Achtung: UUID ändern kann Boot brechen, nur mit Plan ändern:
+# tune2fs -U random /dev/sdb1
+
+# fstab Einträge mit UUID/LABEL
+UUID=xxxx-xxxx  /data  ext4  noatime  0 2
+LABEL=MEDIA     /media xfs   defaults 0 0
+
+# GPT Partition Label/UUID
+parted /dev/sdb name 1 DATA
+blkid -o export /dev/sdb1 | egrep 'PARTLABEL|PARTUUID'
+</code></pre></div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>UUID bevorzugen:</strong> Maximale Stabilität, insbesondere bei wechselnder Geräte-Reihenfolge.</li>
+<li><strong>Eindeutige Labels:</strong> Kurz, sprechend, ohne Leerzeichen; für Menschen hilfreich (<code>DATA, BACKUP, MEDIA</code>).</li>
+<li><strong>Konsistenz:</strong> Einheitliche Strategie (UUID oder LABEL) für alle Mounts dokumentieren.</li>
+<li><strong>Änderungen planen:</strong> UUID/Label-Änderungen immer mit Anpassung von <code>/etc/fstab</code>, Crypttab, Bootloader.</li>
+</ul></div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body"><ul>
+<li><strong>Mount scheitert nach Hardwarewechsel:</strong> Prüfe mit <code>blkid</code>/ <code>lsblk -f</code>, ob UUID/Label noch stimmt; fstab korrigieren.</li>
+<li><strong>Doppelte Labels:</strong> <code>blkid -L NAME</code> zeigt erstes Matching; Labels eindeutig vergeben.</li>
+<li><strong>Alte Signaturen:</strong> Vor Neuformatierung <code>wipefs -a /dev/sdX</code> nutzen, um Mehrdeutigkeiten zu vermeiden.</li>
+<li><strong>Initramfs Cache:</strong> Nach wichtigen Änderungen ggf. <code>update-initramfs -u</code> bzw. <code>dracut -f</code>.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Auflösen
+blkid -L DATA
+blkid -U 1234-ABCD
+
+# Exportformat praktisch fürs Skripting
+blkid -o export /dev/sdb1
+
+# Udev-Properties ansehen
+udevadm info --query=all --name=/dev/sdb1 | less
+
+# Systemd: Automount mit UUID
+UUID=xxxx-xxxx /data ext4 noatime,x-systemd.automount 0 2
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Vergib eindeutige Labels für 2 Partitionen und mounte sie per Label in <code>/etc/fstab</code>.</li>
+<li>Ersetze in einem Testsystem alle <code>/dev/sdX</code>-Einträge in <code>fstab</code> durch <code>UUID=</code> und validiere mit <code>mount -a</code>.</li>
+<li>Zeige <code>PARTLABEL</code>/<code>PARTUUID</code> einer GPT-Partition und erkläre den Unterschied zur FS-UUID.</li>
+</ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Warum sind UUIDs stabiler als <code>/dev/sdX</code>?</li>
+<li>Wie setzt du ein Label für ext4, XFS und Btrfs?</li>
+<li>Wie unterscheiden sich <code>UUID</code> und <code>PARTUUID</code>?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="inodes-und-links.html" rel="prev">← Vorherige Seite</a> · <a href="mount-optionen-und-sicherheit.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Gerätetreiber: Überblick – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Gerätetreiber: Überblick – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container" id="main">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../hardware-geraete.html">Hardware &amp; Geräte</a> · Gerätetreiber</div>
+<h2>Gerätetreiber: Überblick</h2>
+<p class="muted">Kernel, Module, Userspace-Treiber und proprietäre Blobs – Einordnung und Tools.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a class="active" href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc subtopics">
+<a href="kernelmodule-und-modprobe.html"><span class="title">Kernelmodule &amp; modprobe</span></a>
+<a href="udev-und-regeln.html"><span class="title">udev &amp; Regeln</span></a>
+<a href="blockgeraete-lsblk-udevadm.html"><span class="title">Blockgeräte &amp; udevadm</span></a>
+<a class="active" href="geraetetreiber-uebersicht.html"><span class="title">Gerätetreiber: Überblick</span></a>
+<a href="drucker-scanner-cups.html"><span class="title">Drucker/Scanner (CUPS)</span></a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>Treiberarten unterscheiden (Kernel/Userspace/Proprietär).</li>
+<li>Passende Treiber identifizieren.</li>
+<li>Debugging-Ansätze (dmesg, modinfo, lsmod).</li>
+</ul></div></div>
+<div class="card block"><h3>Überblick</h3><div class="card-body">
+<p>Linux nutzt primär <strong>Kernelmodule</strong> als Gerätetreiber. Module können zur Laufzeit geladen/entladen werden (<code>modprobe</code>) und stellen Funktionen über <strong>Sysfs</strong> (<code>/sys</code>), <strong>Netlink</strong> und <strong>Gerätedateien</strong> in <code>/dev</code> bereit. Für einige Gerätekategorien (Drucker/Scanner, Grafik, WLAN) existieren zusätzliche <strong>Userspace‑Komponenten</strong> (z. B. SANE‑Backends, CUPS‑Filter, X.org/Wayland‑Stacks) sowie Firmware‑Dateien.</p>
+<ul>
+<li><strong>Erkennung</strong>: Der Kernel meldet erkannte Hardware (PCI/USB) und ordnet passende Treiber zu (<code>dmesg</code>, <code>journalctl -k</code>).</li>
+<li><strong>Zuordnung</strong>: Udev erzeugt Regeln und <code>/dev/*</code>‑Knoten (<code>udevadm info/monitor</code>).</li>
+<li><strong>Konfiguration</strong>: Module lassen sich mit Parametern versehen (<code>/etc/modprobe.d/*.conf</code>).</li>
+<li><strong>Firmware</strong>: Viele Treiber laden Binärblobs aus <code>/lib/firmware</code> beim Initialisieren.</li>
+</ul>
+</div></div>
+<div class="admonition card info block"><div class="card-body">
+<div class="admonition-title">LPIC‑Relevanz</div>
+<div class="admonition-body">
+<p>Du solltest Treiberzuordnung finden (<code>lspci -nnk</code>, <code>lsusb -t</code>), Module untersuchen (<code>modinfo</code>), laden/entladen (<code>modprobe</code>, <code>lsmod</code>) und udev‑Informationen abrufen (<code>udevadm info</code>). Blacklisting und Modulparameter sind ebenfalls prüfungsrelevant.</p>
+</div>
+</div></div>
+<div class="card block"><h3>Treiberarten und Architektur</h3><div class="card-body">
+<ul>
+<li><strong>Kernelmodule (LKM)</strong>: Meistens als <code>.ko</code> unter <code>/lib/modules/$(uname -r)/</code>; können dynamisch geladen werden.</li>
+<li><strong>Built‑in</strong>: Fest in den Kernel kompiliert (kein Entladen möglich, erscheinen nicht in <code>lsmod</code>).</li>
+<li><strong>Userspace‑Treiber</strong>: SANE‑Backends für Scanner, CUPS‑Filter, grafische Stacks (Mesa/NVIDIA Nutzerkomponenten).</li>
+<li><strong>Proprietäre Komponenten</strong>: DKMS‑Module (z. B. NVIDIA), Firmware‑Blobs in <code>/lib/firmware</code>.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Treiber identifizieren</h3><div class="card-body">
+<p>Nützliche Werkzeuge, um den passenden Treiber zu einem Gerät zu finden:</p>
+<pre><code>lspci -nnk | less      # PCI: Geräte- und Treiberinfos (inkl. "Kernel driver in use")
+lsusb -t -v | less    # USB: Topologie + Kerntreiber/Zuweisungen
+dmesg -w               # Live Kernel-Meldungen (Geräte, Firmware, Fehlermeldungen)
+journalctl -k -b       # Kernel-Log der aktuellen Boot-Session
+modinfo &lt;modul&gt;        # Modul-Metadaten (Version, Autor, Parameter, Firmware)
+readlink -f /sys/class/net/eth0/device/driver  # gebundenen Treiber ablesen</code></pre>
+</div></div>
+<div class="card block"><h3>Treiber laden, entladen und konfigurieren</h3><div class="card-body">
+<pre><code>lsmod                          # geladene Module anzeigen
+sudo modprobe e1000e          # Modul laden (inkl. Abhängigkeiten)
+sudo modprobe -r e1000e       # Modul entladen (falls nicht in Benutzung)
+sudo modinfo e1000e           # Details + Parameter einsehen
+
+# Modulparameter dauerhaft setzen (Beispiel: WLAN Energiesparen aus)
+echo "options iwlwifi power_save=0" | sudo tee /etc/modprobe.d/wlan.conf
+
+# Modul vollständig sperren (Blacklisting)
+echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-gpu.conf
+
+# Initramfs ggf. aktualisieren (Debian/Ubuntu)
+sudo update-initramfs -u
+# oder (RHEL/Fedora/Alma/Rocky)
+sudo dracut -f</code></pre>
+<p><em>Hinweis:</em> Entladen schlägt fehl, wenn das Modul in Benutzung ist (siehe <code>lsmod</code> „Used by“). In solchen Fällen Gerät trennen, Dienst stoppen oder in den Single‑User‑Modus wechseln.</p>
+</div></div>
+<div class="card block"><h3>udev und Gerätedateien</h3><div class="card-body">
+<pre><code>udevadm info --query=all --name=/dev/sda | less   # udev-Attribute/Regeln zu Gerät
+udevadm monitor -u -k                            # Hotplug/Kernel-Events live verfolgen
+ls -l /dev/disk/by-id /dev/disk/by-uuid         # stabile Namen (Symlinks)</code></pre>
+<p>Udev‑Regeln können anhand von Attributen (Vendor/Product‑ID, Seriennummer) <strong>stabile Namen</strong> vergeben oder Berechtigungen setzen.</p>
+</div></div>
+<div class="card block"><h3>Firmware</h3><div class="card-body">
+<p>Viele Treiber laden Firmware beim Initialisieren aus <code>/lib/firmware</code>. Fehlt sie, zeigen <code>dmesg</code>/<code>journalctl -k</code> Meldungen wie „firmware: failed to load …“. Installiere das passende Paket (z. B. <code>linux-firmware</code> oder herstellerspezifisch) und aktualisiere ggf. das Initramfs.</p>
+</div></div>
+<div class="card block"><h3>Fehlersuche (Guided)</h3><div class="card-body">
+<ol>
+<li><strong>Erkennung prüfen</strong>: Steht das Gerät in <code>lspci</code>/<code>lsusb</code>? Meldungen in <code>dmesg</code>?</li>
+<li><strong>Treiberzuordnung</strong>: Was zeigt <code>lspci -nnk</code> bzw. <code>lsusb -t</code>? Ist ein Treiber „in use“?</li>
+<li><strong>Modul prüfen</strong>: <code>modinfo &lt;modul&gt;</code> (abhängige Firmware/Parameter), <code>lsmod</code>.</li>
+<li><strong>Param/Blacklist</strong>: Teste Modulparameter oder Blacklisting in <code>/etc/modprobe.d/</code>.</li>
+<li><strong>Initramfs</strong>: Nach Änderungen <code>update-initramfs -u</code> bzw. <code>dracut -f</code>.</li>
+</ol>
+</div></div>
+<div class="card block"><h3>Praxisübungen</h3><div class="card-body">
+<ol class="exercise-steps">
+<li>Finde den Treiber deiner Netzwerkkarte.<br/><em>Tipp:</em> <code>lspci -nnk | grep -A3 -i ethernet</code></li>
+<li>Zeige Modulparameter des Treibers an (<code>modinfo</code>) und dokumentiere 1–2 sinnvolle Parameter.</li>
+<li>Überwache Hotplug‑Ereignisse, während du einen USB‑Stick ein‑/aussteckst (<code>udevadm monitor</code>).</li>
+<li>Suche in <code>dmesg</code> nach Firmware‑Meldungen für WLAN/GPU und identifiziere das benötigte Paket.</li>
+</ol>
+<details class="solution"><summary>Lösungen/Beispielwege anzeigen</summary>
+<p><strong>1)</strong> <code>lspci -nnk</code> listet „Kernel driver in use“. Alternativ: <code>readlink -f /sys/class/net/&lt;if&gt;/device/driver</code>.</p>
+<p><strong>2)</strong> <code>modinfo &lt;treiber&gt;</code> → Abschnitt „parm:“. Setzen über <code>/etc/modprobe.d/*.conf</code>.</p>
+<p><strong>3)</strong> <code>udevadm monitor -u -k</code> zeigt <em>add/remove</em> und Kernel‑Events; passende Regeln über Attribute aus <code>udevadm info</code>.</p>
+<p><strong>4)</strong> <code>dmesg | grep -i firmware</code>; installiere ggf. <code>linux-firmware</code> u. a.</p>
+</details>
+</div></div>
+<div class="card block quiz"><div class="card-body">
+<div class="quiz-question">Welche Befehle/Wege zeigen dir den konkreten gebundenen Treiber zu einem Gerät? <em>(Mehrfachauswahl)</em></div>
+<div class="quiz-options">
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span><code>lspci -nnk</code> und „Kernel driver in use“ für PCI‑Geräte</span></label>
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span><code>lsusb -t -v</code> (Topologie/zugeordnete Treiber bei USB)</span></label>
+<label class="quiz-option" data-correct="0"><input type="checkbox"/> <span><code>modinfo</code> (zeigt Metadaten, aber nicht welches Gerät es aktuell bindet)</span></label>
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span><code>readlink -f /sys/class/net/&lt;if&gt;/device/driver</code></span></label>
+</div>
+<div class="quiz-actions">
+<button class="btn check-quiz">Prüfen</button>
+<button class="btn reset-quiz">Zurücksetzen</button>
+</div>
+<div class="quiz-feedback"></div>
+</div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body">
+<table>
+<thead><tr><th>Befehl</th><th>Zweck</th></tr></thead>
+<tbody>
+<tr><td><code>lspci -nnk</code></td><td>PCI‑Gerät inkl. „Kernel driver in use“</td></tr>
+<tr><td><code>lsusb -t -v</code></td><td>USB‑Topologie und Treiberpfade</td></tr>
+<tr><td><code>lsmod</code></td><td>Geladene Module + Nutzung</td></tr>
+<tr><td><code>modprobe [‑r] &lt;modul&gt;</code></td><td>Modul laden/entladen</td></tr>
+<tr><td><code>modinfo &lt;modul&gt;</code></td><td>Metadaten, Parameter, Firmware</td></tr>
+<tr><td><code>udevadm info/monitor</code></td><td>Udev‑Attribute/Events</td></tr>
+<tr><td><code>dmesg</code>, <code>journalctl -k</code></td><td>Kernel‑Logs (Erkennung/Firmware)</td></tr>
+<tr><td><code>/etc/modprobe.d/*.conf</code></td><td>Parameter/Blacklisting</td></tr>
+</tbody>
+</table>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Wie findest du den geladenen Treiber eines PCI-Geräts?</li>
+<li>Welche Rolle spielt das Paket <em>linux-firmware</em>?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="drucker-scanner-cups.html" rel="prev">← Vorherige Seite</a> · <a href="kernelmodule-und-modprobe.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<button aria-label="Nach oben" class="btn back-to-top">↑</button>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

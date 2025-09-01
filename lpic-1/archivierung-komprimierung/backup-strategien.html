@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Backup-Strategien – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Backup-Strategien – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a> · Backup-Strategien</div>
+<h2>Backup-Strategien</h2>
+<p class="muted">3-2-1-Regel, Aufbewahrungsklassen, Rotation und Wiederherstellungstests.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a class="active" href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="tar-grundlagen.html">tar-Grundlagen</a>
+<a href="kompressionsverfahren.html">Kompressionsverfahren</a>
+<a href="rsync-und-synchronisation.html">rsync &amp; Synchronisation</a>
+<a class="active" href="backup-strategien.html">Backup-Strategien</a>
+<a href="inkrementell-und-differenziell.html">Inkrementell &amp; Differenziell</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>3-2-1-Strategie anwenden und Offsite-Kopie berücksichtigen.</li>
+<li>Retention &amp; Rotation (z.B. GFS: Großvater-Vater-Sohn) planen.</li>
+<li>Wiederherstellung regelmäßig testen (DR-Tests).</li>
+</ul></div></div>
+<div class="card block"><h3>Konzept</h3><div class="card-body">
+<p><strong>3-2-1:</strong> Mind. 3 Kopien, 2 verschiedene Medien, 1 Offsite. Trenne Verantwortlichkeiten (Produktion vs. Backup). Verschlüssele Offsite-Backups.</p>
+<pre><code># Beispiel: Rotation mit systemd timer/cron + tar/rsync
+# täglich Diff, wöchentlich Vollbackup, monatlich Offsite Sync (z.B. rclone)
+</code></pre>
+</div></div>
+<div class="card block"><h3>Begriffe: RPO &amp; RTO</h3><div class="card-body">
+<ul>
+<li><strong>RPO</strong> (Recovery Point Objective): Wie viel Datenverlust ist akzeptabel? Bestimmt die Backup-Frequenz.</li>
+<li><strong>RTO</strong> (Recovery Time Objective): Wie schnell muss wiederhergestellt sein? Beeinflusst Technologie und Design.</li>
+</ul>
+<p class="muted">Beispiele: RPO 15 Min → Journaling/inkrementelle Sicherung; RTO 1 h → schnelle Medien, vordefinierte Runbooks.</p>
+</div></div>
+<div class="card block"><h3>Backup-Typen</h3><div class="card-body">
+<ul>
+<li><strong>Vollbackup</strong>: komplette Kopie; Basis für Restore; teuer in Zeit/Speicher.</li>
+<li><strong>Inkrementell</strong>: nur Änderungen seit letztem Backup (voll/inkr.); schnell, Kette beim Restore beachten.</li>
+<li><strong>Differenziell</strong>: Änderungen seit letztem Vollbackup; Restore: Voll + letztes Differenzial.</li>
+<li><strong>Synthetisch Voll</strong>: Vollbackup wird aus Voll + Inkrementellen am Ziel rekonstruiert.</li>
+<li><strong>Continuous</strong>: kontinuierlich (z. B. per Snapshots, WAL-Shipping).</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Rotation &amp; Aufbewahrung</h3><div class="card-body">
+<ul>
+<li><strong>GFS</strong> (Großvater-Vater-Sohn): täglich/wöchentlich/monatlich; definierte Retention pro Stufe.</li>
+<li><strong>Tower of Hanoi</strong>: Rotation für lange Retention mit weniger Medien.</li>
+<li><strong>Retention</strong>: gesetzliche/organisatorische Vorgaben (z. B. DSGVO, GoBD) beachten.</li>
+<li><strong>Immutable/WORM</strong>: unveränderlich für Ransomware-Resilienz.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Medien &amp; Ziele</h3><div class="card-body">
+<ul>
+<li><strong>Lokaler Storage</strong>: schnell, aber kein Schutz gegen Standortverlust.</li>
+<li><strong>NAS</strong>: bequem, aber Risiko bei Ransomware (SMB/NFS). Härtung/Netzsegmentierung.</li>
+<li><strong>Tape</strong>: kosteneffizient, Air-Gap, langlebig; längere RTO.</li>
+<li><strong>Object/Cloud</strong>: S3/Swift; Versioning, Lifecycle, Cross-Region, Object-Lock.</li>
+<li><strong>Snapshots</strong>: schnell, aber kein Ersatz für Offsite-Backups.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Konsistenz &amp; Snapshots</h3><div class="card-body">
+<p>
+              Applikationskonsistenz sicherstellen: Dienste quiescen, LVM/Btrfs/ZFS-Snapshots nutzen, DB-spezifische Werkzeuge
+              (z. B. <code>mysqldump --single-transaction</code>, PostgreSQL WAL-Archiving).
+            </p>
+<pre><code># LVM Snapshot Beispiel (vereinfachtes Muster)
+lvcreate -L 5G -s -n data_snap /dev/vg/data
+mount /dev/vg/data_snap /mnt/snap
+rsync -aHAX --delete /mnt/snap/ /backup/host/data/
+umount /mnt/snap &amp;&amp; lvremove -f /dev/vg/data_snap
+</code></pre>
+</div></div>
+<div class="card block"><h3>Verschlüsselung &amp; Schlüsselmanagement</h3><div class="card-body">
+<ul>
+<li><strong>At-Rest</strong>: Verschlüssele Daten serverseitig oder clientseitig (GPG, age).</li>
+<li><strong>In-Transit</strong>: SFTP/SSH, TLS, VPN.</li>
+<li><strong>Schlüssel</strong>: sicher speichern (HSM, KMS, Tresor), Rotation und Recovery-Prozesse dokumentieren.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Werkzeuge im Überblick</h3><div class="card-body">
+<ul>
+<li><code>tar</code> + <code>gzip</code>/<code>zstd</code>: universell, einfach zu skripten.</li>
+<li><code>rsync</code>: effizient für Spiegel/inkrementelle Kopien.</li>
+<li><code>borg</code>/<code>restic</code>/<code>duplicity</code>: Deduplizierung, Verschlüsselung, Pruning, Repos.</li>
+<li><code>rclone</code>: Sync in diverse Cloud-Backends.</li>
+<li>Datenbanken: <code>pg_dump</code>/<code>pg_basebackup</code>, <code>mysqldump</code>, <code>xtrabackup</code>.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Automatisierung</h3><div class="card-body">
+<pre><code># systemd timer (Beispiel)
+# /etc/systemd/system/backup.service
+[Unit]
+Description=Nightly backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup.sh
+
+# /etc/systemd/system/backup.timer
+[Unit]
+Description=Run backup daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+</div></div>
+<div class="card block"><h3>Validierung &amp; Restore-Tests</h3><div class="card-body">
+<ul>
+<li><strong>Integritätschecks</strong>: Prüfsummen, <code>borg check</code>, <code>restic check</code>, <code>tar -tvf</code>.</li>
+<li><strong>Test-Restores</strong>: regelmäßig File-/System-Restore in isolierter Umgebung üben.</li>
+<li><strong>Dokumentation</strong>: Runbooks, Abhängigkeiten, Kontakte, RTO/RPO-Ziele.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Skizziere einen GFS-Plan für deine Umgebung (Aufbewahrungszeiten, Speicherbedarf).</li>
+<li>Definiere RPO/RTO für drei Workloads (DB, Fileshare, Webapp) und leite die Backup-Frequenz ab.</li>
+<li>Implementiere ein tägliches <code>restic</code>-Backup in ein S3-kompatibles Backend inkl. Verschlüsselung.</li>
+<li>Baue ein LVM-Snapshot-Backup für eine laufende VM und dokumentiere das Restore.</li>
+<li>Führe einen Test-Restore-Stichprobenplan ein (monatlich) und protokolliere Ergebnisse.</li>
+</ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Was ist der Unterschied zwischen inkrementellen und differenziellen Backups beim Restore?</li>
+<li>Wie beeinflussen RPO und RTO die Wahl von Medien und Tools?</li>
+<li>Warum ersetzen Snapshots kein Offsite-Backup?</li>
+<li>Welche Vorteile hat ein synthetisches Vollbackup?</li>
+<li>Wie schützt du Backups vor Ransomware (z. B. Least Privilege, Immutable, Air-Gap)?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Archivierung, Kompression und Synchronisation.</p>
+<pre><code># tar: Archiv erstellen/entpacken
+# c=create, x=extract, v=verbose, f=file, z=gzip, J=xz
+ tar czvf backup.tgz /etc /home
+ tar xzvf backup.tgz -C /restore
+
+# Inkrementelle Backups mit tar-Snapshots
+ tar --listed-incremental=snap.snar -czf full.tgz /home
+ tar --listed-incremental=snap.snar -czf inc-1.tgz /home
+
+# rsync: Synchronisierung &amp; inkrementelle Kopie
+ rsync -a --delete /src/ user@host:/dst/
+ rsync -a --link-dest=/dst/prev /src/ /dst/current
+
+# Kompression
+ gzip -9 datei; bzip2 datei; xz -T0 datei; zstd -19 datei
+</code></pre>
+<h4>Strategien</h4><ul><li>3-2-1-Regel: 3 Kopien, 2 unterschiedliche Medien, 1 Offsite.</li><li>Rotation: Grandfather‑Father‑Son oder Tower‑of‑Hanoi.</li><li>Integritätsprüfung: <code>tar -tvf</code>, Checksums (<code>sha256sum</code>), <code>rsync --checksum</code>.</li></ul>
+<h4>Fehlerbilder</h4><ul><li>Tar-Pfade relativ vs. absolut (Extraktion mit <code>-C</code> und Vorsicht bei <code>/</code>).</li><li><code>--delete</code> zerstört Ziel → nur einsetzen, wenn gewollt und getestet.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>tar</code></td><td>c/x/v/f/z/J; --listed-incremental=SNAP; -C Verzeichnis; --exclude</td></tr>
+<tr><td><code>rsync</code></td><td>-a Archivmodus; --delete; --checksum; --link-dest Hardlinks für inkrementelle Backups; -e ssh</td></tr>
+<tr><td><code>gzip/bzip2/xz/zstd</code></td><td>-1...-9 Kompressionsgrad; xz -T0 Threads; zstd -19 starke Kompression</td></tr>
+<tr><td><code>sha256sum</code></td><td>Integritätsprüfung; -c prüfen</td></tr>
+<tr><td><code>cron/systemd-timers</code></td><td>Zeitgesteuerte Backups; systemd.timer zuverlässiger als @hourly-Cron in Sleep-Setups</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Tägliche inkrementelle Homes, wöchentliche Vollbackups (3‑2‑1‑Regel).</li>
+<li>rsync --link-dest für platzsparende Snapshots mit Hardlinks.</li>
+<li>Recovery‑Probe: Wiederherstellung stichprobenartig testen (Disaster‑Day).</li>
+<li>Offsite‑Sync via SSH + Bandbreitenlimit (--bwlimit) in Nachtstunden.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Quelle erreichbar &amp; konsistent? (mount, df, dmesg)</li>
+<li>Tar‑Optionen korrekt (c/z/J/f)?</li>
+<li>rsync‑Dry‑Run ohne Überraschungen? (--dry-run)</li>
+<li>Prüfsumme passt? (sha256sum -c)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Tägliche inkrementelle Homes, wöchentliche Vollbackups (3‑2‑1‑Regel). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>rsync --link-dest für platzsparende Snapshots mit Hardlinks. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Recovery‑Probe: Wiederherstellung stichprobenartig testen (Disaster‑Day). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Offsite‑Sync via SSH + Bandbreitenlimit (--bwlimit) in Nachtstunden. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># tar &amp; rsync
+tar --listed-incremental=snap.snar -czf full.tgz /home
+tar --listed-incremental=snap.snar -czf inc-1.tgz /home
+rsync -a --delete --link-dest=/b/snap-001 /a/ /b/snap-002
+sha256sum -c sums.txt</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="inkrementell-und-differenziell.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

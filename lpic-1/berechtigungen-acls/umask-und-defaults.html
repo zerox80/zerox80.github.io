@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>umask &amp; Defaults</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="umask &amp; Defaults" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a> ▸ umask &amp; Defaults</div>
+<h2>umask &amp; Defaults</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="rechte-grundlagen.html">Rechte‑Grundlagen</a>
+<a href="chmod-chown-chgrp.html">chmod, chown, chgrp</a>
+<a class="active" href="umask-und-defaults.html">umask &amp; Defaults</a>
+<a href="special-bits-suid-sgid-sticky.html">Special Bits (suid/sgid/sticky)</a>
+<a href="acl-grundlagen.html">ACL‑Grundlagen</a>
+<a href="acl-werkzeuge-getfacl-setfacl.html">ACL‑Werkzeuge</a>
+<a href="zugriffsstrategien-und-best-practices.html">Best Practices</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>umask berechnen und anwenden.</li><li>Default‑Rechte für Dateien/Verzeichnisse verstehen.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>umask
+umask 027
+# Datei: 666-umask, Verzeichnis: 777-umask
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Welche Rechte haben neue Dateien bei umask 027?</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Worin unterscheiden sich umask‑Werte 022 und 077?</li></ol></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<ul>
+<li><strong>Default‑Modi:</strong> Dateien starten bei 666, Verzeichnisse bei 777 → effektive Rechte = Default − umask.</li>
+<li><strong>Beispiel:</strong> umask 027 → Datei 640, Verzeichnis 750.</li>
+<li><strong>Setgid auf Verzeichnissen:</strong> Neue Dateien/Dirs erben die Gruppe; umask beeinflusst weiterhin rwx‑Bits.</li>
+<li><strong>Systemweite Vorgaben:</strong> <code>/etc/login.defs</code> (Schlüssel <code>UMASK</code>), Shell‑Profile (<code>/etc/profile</code>, <code>~/.bashrc</code>).</li>
+<li><strong>Dienstspezifisch:</strong> systemd <code>UMask=</code> in Unit‑Dateien beschränkt Service‑Dateierstellung.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body"><pre><code># Aktuelle umask anzeigen/setzen (Shell)
+umask
+umask 027
+
+# Wirkung testen
+touch f; mkdir d; ls -ld f d
+
+# systemweit (Beispiel; Distribution beachten)
+grep ^UMASK /etc/login.defs
+
+# setgid‑Ordner für Teamarbeit
+mkdir -p /srv/project
+chgrp project /srv/project
+chmod 2775 /srv/project   # sgid
+umask 002                 # kollaborative Erstellung
+
+# systemd: UMask für Dienst setzen
+systemctl edit mysvc.service
+[Service]\nUMask=007
+</code></pre></div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Least Privilege:</strong> Auf Servern häufig 027/077; in Teamverzeichnissen 002 mit sgid.</li>
+<li><strong>Konsistenz:</strong> Einheitliche umask in Shell‑Profilen und Diensten definieren und dokumentieren.</li>
+<li><strong>Audit:</strong> Sensible Pfade regelmäßig auf zu offene Rechte prüfen.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Rechenhilfe
+# Datei: eff = 666 &amp; ~umask, Verzeichnis: 777 &amp; ~umask
+umask 022  # Datei 644, Verzeichnis 755
+umask 077  # Datei 600, Verzeichnis 700
+
+# temporär für einen Befehl
+umask 077; echo secret &gt; file
+</code></pre></div></div>
+<div class="card block"><h3>Weitere Übungen</h3><div class="card-body"><ol>
+<li>Setze umask 027 und überprüfe die resultierenden Rechte neuer Dateien/Verzeichnisse.</li>
+<li>Richte ein Projektverzeichnis mit sgid und umask 002 ein. Teste mit zwei Benutzern die Gruppenerbung.</li>
+<li>Konfiguriere für einen systemd‑Dienst <code>UMask=007</code> und verifiziere die Log‑Dateirechte.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Warum haben neu erstellte Dateien nie das x‑Bit allein durch umask?</li>
+<li>Wie interagiert <code>UMask=</code> in systemd Units mit der Shell‑umask des ExecStart‑Programms?</li>
+<li>Welche Kombination empfiehlst du für kollaborative Teamordner (umask, sgid, Gruppe)?</li>
+</ol></div></div>
+<div class="card block"><h3>Distro‑Spezifika &amp; Policies</h3><div class="card-body">
+<ul>
+<li><strong>/etc/login.defs:</strong> Schlüssel <code>UMASK</code> legt Standard für neu angelegte Logins/Shells fest (Distribution beachten).</li>
+<li><strong>PAM:</strong> <code>pam_umask.so</code> kann umask aus <code>/etc/login.defs</code>, GECOS oder expliziten PAM‑Optionen beziehen.</li>
+<li><strong>Shell‑Profile:</strong> <code>/etc/profile</code>, <code>/etc/bash.bashrc</code>, <code>~/.profile</code> können umask überschreiben.</li>
+<li><strong>systemd‑Dienste:</strong> Unit‑Directive <code>UMask=</code> gilt für vom Dienst erstellte Dateien/Verzeichnisse.</li>
+</ul>
+<pre><code># PAM-Beispiel (je nach Distro in common-session oder system-auth)
+session optional pam_umask.so usergroups
+
+# login.defs
+UMASK 027
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Container &amp; Netzlaufwerke</h3><div class="card-body">
+<ul>
+<li><strong>Container:</strong> umask ist pro Prozess/Shell. In OCI‑Containern über Entry‑Point/Shellprofile setzen.</li>
+<li><strong>Samba/CIFS:</strong> umask wird oft über <code>file_mode=</code>/<code>dir_mode=</code> oder Server‑Policies übersteuert.</li>
+<li><strong>NFS:</strong> Server‑Export und Client‑Mount‑Optionen können das Verhalten beeinflussen.</li>
+</ul>
+<pre><code># Dockerfile Beispiel
+RUN echo 'umask 027' &gt;&gt; /etc/profile
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body">
+<ul>
+<li><strong>Unerwartete Rechte:</strong> Prüfe Reihenfolge: systemd UMask → PAM → Shell‑Profile → Anwendung setzt selbst.</li>
+<li><strong>Kein x‑Bit:</strong> umask vergibt nie execute bei Dateien; Programme müssen es setzen (<code>install</code>, <code>chmod</code>).</li>
+<li><strong>Teamordner:</strong> Fehlt <code>sgid</code> oder sind Default‑ACLs nötig? Nur umask reicht oft nicht.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz" id="quiz-umask-1">
+<div class="quiz-question">Welche effektiven Rechte erhalten neue Dateien bei <code>umask 027</code>?</div>
+<div class="quiz-options">
+<label class="quiz-option" data-correct="1"><input name="qu1" type="radio"/> 640</label>
+<label class="quiz-option"><input name="qu1" type="radio"/> 750</label>
+<label class="quiz-option"><input name="qu1" type="radio"/> 644</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+<div class="quiz" id="quiz-umask-2">
+<div class="quiz-question">Welche Aussage zu <code>UMask=</code> in systemd ist korrekt?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qu2" type="radio"/> Sie setzt die umask global für alle Prozesse</label>
+<label class="quiz-option" data-correct="1"><input name="qu2" type="radio"/> Sie gilt für vom Dienst erzeugte Dateien/Verzeichnisse</label>
+<label class="quiz-option"><input name="qu2" type="radio"/> Sie vergibt bei Dateien automatisch das x‑Bit</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Dateirechte, Sonderbits und ACLs.</p>
+<ul><li>Symbolische vs. oktale Modi (<code>u+rw,g-w,o=</code> vs. <code>640</code>).</li><li>Sonderbits: <code>suid</code> (u+s), <code>sgid</code> (g+s), <code>sticky</code> (o+t).</li><li>ACLs erlauben benutzerspezifische Rechte zusätzlich zu U/G/O.</li></ul>
+<pre><code># Standardrechte via umask (Beispiel: 022)
+umask 022
+
+# Klassische Rechte
+chmod 640 datei
+chmod u+rwx,g+rx,o-rwx script.sh
+chown alice:proj datei
+
+# Sonderbits
+chmod u+s /usr/local/bin/tool
+chmod g+s /srv/proj
+chmod o+t /tmp
+
+# ACLs
+setfacl -m u:alice:rw- -m g:proj:r-- datei
+getfacl datei
+
+# Default-ACLs für neue Dateien in Ordnern
+setfacl -d -m g:proj:rwX /srv/proj
+</code></pre>
+<h4>Fehlerbilder</h4><ul><li>ACL mask reduziert effektive Rechte → <code>getfacl</code> prüfen (mask).</li><li><code>chmod 777</code> als „Fix“ → in der Prüfung tabu; gezielt Rechte setzen.</li></ul>
+<h4>Prüfungstipps</h4><ul><li>Rechenweg: umask bestimmt <em>abgezogene</em> Bits (Basis 666/777).</li><li><code>X</code> in ACL (großes X) setzt x nur, wenn es ein Ordner ist oder x bereits irgendwo gesetzt war.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>chmod</code></td><td>symbolisch u/g/o/a,+/-/=(rwxXst); oktal 0–7; --reference=DATEI</td></tr>
+<tr><td><code>chown</code></td><td>USER[:GRUPPE] DATEI; -R rekursiv; --from prüfen</td></tr>
+<tr><td><code>chgrp</code></td><td>GRUPPE DATEI; -R rekursiv</td></tr>
+<tr><td><code>setfacl</code></td><td>-m u:NAME:rwX g:GRUPPE:r--; -x Eintrag löschen; -b alle ACLs löschen; -d Default-ACL</td></tr>
+<tr><td><code>getfacl</code></td><td>Effektive Rechte &amp; Mask anzeigen</td></tr>
+<tr><td><code>umask</code></td><td>Basis 666/777; mask subtrahiert Bits; häufig 022 oder 027</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX).</li>
+<li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen.</li>
+<li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD).</li>
+<li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Ownership korrekt? (ls -l)</li>
+<li>U/G/O‑Rechte passend? (chmod)</li>
+<li>ACLs vorhanden &amp; Mask? (getfacl)</li>
+<li>Sonderbits sinnvoll? (suid/sgid/sticky)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Rechte &amp; ACLs
+umask 027
+chmod u=rw,g=r,o= datei
+chown alice:proj datei
+chmod g+s /srv/proj    # sgid
+chmod o+t /shared      # sticky
+setfacl -m u:alice:rw- -m g:proj:rwX ordner
+getfacl ordner</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="special-bits-suid-sgid-sticky.html" rel="prev">← Vorherige Seite</a> · <a href="zugriffsstrategien-und-best-practices.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

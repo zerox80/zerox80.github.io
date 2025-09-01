@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dateien, Pfade &amp; Globbing – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Dateien, Pfade &amp; Globbing – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a> · Dateien &amp; Globbing</div>
+<h2>Dateien, Pfade &amp; Globbing</h2>
+<p class="muted">Dateioperationen, Pfadvariablen und Mustererweiterung in der Shell.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a class="active" href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="unix-philosophie.html">Unix-Philosophie</a>
+<a href="hilfesysteme-man-info.html">Hilfe-Systeme</a>
+<a href="editoren-vi-nano.html">Editoren: vi &amp; nano</a>
+<a class="active" href="dateien-pfade-globbing.html">Dateien, Pfade &amp; Globbing</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Operationen</h3><div class="card-body">
+<pre><code>cp -a src/ dst/          # rekursiv, Attribute bewahren
+mv file{,.bak}          # umbenennen via Brace-expansion
+rm -rf tmp/*            # löschen (vorsichtig!)
+install -m 0644 f /etc/app/  # Rechte setzen
+</code></pre>
+<p>
+              Grundlegende Dateioperationen unter Linux folgen konsistenten Mustern. Nutze
+              <code>cp</code> zum Kopieren, <code>mv</code> zum Verschieben/Umbenennen, <code>rm</code> zum Löschen
+              und <code>install</code> für das Kopieren mit Rechte-/Eigentümer-Setzung in einem Schritt.
+              Achte auf rekursive Operationen bei Verzeichnissen und sichere Standardrechte über
+              <code>umask</code> bzw. Optionen wie <code>-m</code>.
+            </p>
+<pre><code># Kopieren mit Rechten/Zeitstempeln erhalten
+cp -a /etc/skel/ ~/neues-profil/
+
+# Sicheres Umbenennen (Backup anlegen)
+mv datei.txt{,.bak}
+
+# Verzeichnisse robust anlegen
+mkdir -p /opt/app/{bin,lib,log}
+
+# Links (siehe unten):
+ln file.txt hartlink.txt   # Hardlink
+ln -s /var/log app-log     # Symlink
+
+# Entfernen: interaktiv und rekursiv nur falls nötig
+rm -ri ./daten/
+</code></pre>
+<p class="muted">
+              Tipp: Verwende bei potenziell destruktiven Befehlen zuerst <code>echo</code>, um die
+              Expansion zu prüfen: <code>echo rm -rf tmp/*</code> zeigt dir, was gelöscht würde.
+            </p>
+</div></div>
+<div class="card block"><h3>Globbing</h3><div class="card-body">
+<pre><code>ls *.log       # Suffix
+ls file?.txt  # genau 1 Zeichen
+ls {a,b}*.md  # Alternativen
+shopt -s nullglob dotglob  # leere Matches/sichtbare Punkte
+</code></pre>
+<p>
+              Unter „Globbing“ versteht man die Mustererweiterung der Shell, bevor ein Programm
+              gestartet wird. Glob-Muster sind keine regulären Ausdrücke, sondern einfache
+              Platzhalter für Dateinamen.
+            </p>
+<ul>
+<li><code>*</code> steht für beliebig viele Zeichen (auch 0).</li>
+<li><code>?</code> steht für genau ein Zeichen.</li>
+<li><code>[abc]</code> Zeichenklasse; <code>[a-z]</code> Bereich; <code>[^a]</code> Negation.</li>
+<li><code>{foo,bar}</code> Brace-Expansion erzeugt Alternativen vor dem Globbing.</li>
+<li><code>**</code> (mit <code>globstar</code>) durchsucht rekursiv Verzeichnisse.</li>
+</ul>
+<pre><code># Zeichenklassen
+echo img_[0-9][0-9].png
+
+# Negation (alles außer .bak)
+echo *.[!b][!a][!k]
+
+# Rekursiv (Bash: globstar)
+shopt -s globstar
+echo **/*.md
+shopt -u globstar
+</code></pre>
+<p class="muted">
+              Beachte: Versteckte Dateien (beginnend mit <code>.</code>) werden standardmäßig nicht
+              gematcht. Aktiviere <code>dotglob</code> oder benutze Muster wie <code>.*</code> explizit.
+            </p>
+</div></div>
+<div class="card block"><h3>Pfadvariablen</h3><div class="card-body">
+<pre><code>echo "$PATH" | tr ':' '\n'
+export PATH="/opt/app/bin:$PATH"
+type -a ls
+</code></pre>
+<p>
+              Der <code>PATH</code> bestimmt, wo die Shell ausführbare Programme sucht. Die Reihenfolge ist
+              relevant. <code>type -a</code> zeigt alle Treffer, <code>which</code> üblicherweise nur den ersten.
+            </p>
+<p>
+              Dauerhaft setzen:
+            </p>
+<pre><code># systemweit (abhängig von Distribution): /etc/profile.d/app.sh
+export PATH=/opt/app/bin:$PATH
+
+# benutzerspezifisch:
+echo 'export PATH="$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</code></pre>
+<p class="muted">
+              Weitere relevante Variablen: <code>MANPATH</code>, <code>INFOPATH</code>, <code>LD_LIBRARY_PATH</code> (mit
+              Vorsicht verwenden), <code>CDPATH</code> fürs bequemere <code>cd</code>.
+            </p>
+</div></div>
+<div class="card block"><h3>Quoting &amp; Escaping</h3><div class="card-body">
+<p>
+              Richtiges Quoting verhindert unerwünschtes Globbing oder Wort-Splitting:
+            </p>
+<ul>
+<li><strong>Ungequotet</strong>: Globbing und Parameterexpansion finden statt.</li>
+<li><strong>Einfachquoting</strong> <code>'...'</code>: Wort wird literal übernommen (außer <code>'</code> selbst).</li>
+<li><strong>Doppelquoting</strong> <code>"..."</code>: Variablen werden expandiert, Globs nicht.</li>
+<li><strong>Escape</strong> <code>\</code>: Nächstes Zeichen literal, z. B. <code>\*</code>.</li>
+</ul>
+<pre><code># Unterschied
+echo *.txt          # expandiert zu Dateiliste
+echo "*.txt"        # bleibt wörtlich
+
+# Leerzeichen in Pfaden
+mv "Mein Dokument.txt" MeinDok.txt
+</code></pre>
+</div></div>
+<div class="card block"><h3>Glob-Optionen (Bash shopt)</h3><div class="card-body">
+<pre><code>shopt -s nullglob    # leere Matches expandieren zu Nichts (nicht zum Literal)
+shopt -s failglob    # leere Matches führen zu einem Fehler
+shopt -s dotglob     # berücksichtigt versteckte Dateien
+shopt -s nocaseglob  # case-insensitive (je nach Locale)
+shopt -s globstar    # ** matcht rekursiv
+</code></pre>
+<p class="muted">Mit <code>shopt -u</code> kannst du Optionen wieder deaktivieren.</p>
+</div></div>
+<div class="card block"><h3>Links (Hard/Symbolic)</h3><div class="card-body">
+<p>
+              Linux-Dateisysteme kennen <em>Hardlinks</em> (weitere Verzeichniseinträge auf denselben
+              Inode) und <em>Symlinks</em> (Zeiger auf einen Pfad). Hardlinks funktionieren nur innerhalb
+              desselben Dateisystems und nicht auf Verzeichnisse (mit Ausnahmen), Symlinks sind
+              flexibler.
+            </p>
+<pre><code># Hardlink teilt den gleichen Inode
+ln original.txt kopie.txt
+stat original.txt kopie.txt | grep Inode
+
+# Symbolic Link zeigt auf Pfad
+ln -s /var/www/html public_html
+ls -l public_html
+</code></pre>
+</div></div>
+<div class="card block"><h3>find &amp; Glob</h3><div class="card-body">
+<p>
+<code>find</code> ergänzt Globbing durch rekursive, ausdrucksstarke Suchen. Wichtig ist hier
+              das korrekte Quoting, damit die Shell das Muster nicht vorher expandiert.
+            </p>
+<pre><code># Richtig quoten, damit find selbst matched
+find . -name "*.log" -size +1M -mtime -7 -print
+
+# Mit -exec oder xargs weiterverarbeiten
+find src -type f -name "*.c" -exec grep -Hn "TODO" {} +
+find . -name "*.bak" -print0 | xargs -0 rm -v
+</code></pre>
+</div></div>
+<div class="card block"><h3>Praxisübungen</h3><div class="card-body">
+<ol>
+<li>Lege die Struktur <code>projekt/{bin,lib,doc}/{de,en}</code> mit einem Befehl an.</li>
+<li>Erzeuge Symlinks von <code>doc/de</code> und <code>doc/en</code> in ein Verzeichnis <code>pub</code>.</li>
+<li>Finde alle <code>.tmp</code>-Dateien unterhalb von <code>projekt</code>, die älter als 10 Tage sind, und lösche sie nach Bestätigung.</li>
+<li>Aktiviere <code>nullglob</code> und demonstriere den Unterschied zu Standardverhalten.</li>
+</ol>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Was bewirkt <code>cp -a</code> im Vergleich zu <code>-r</code>?</li>
+<li>Wie aktivierst du in Bash, dass Glob-Muster ohne Treffer zu leer expandieren?</li>
+<li>Worin unterscheidet sich Globbing von regulären Ausdrücken?</li>
+<li>Wann sind Hardlinks ungeeignet und warum?</li>
+<li>Wie beeinflusst die Reihenfolge im <code>PATH</code> die Befehlsauflösung?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="editoren-vi-nano.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

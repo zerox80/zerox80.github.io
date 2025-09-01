@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>FHS – Filesystem Hierarchy Standard</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="FHS – Filesystem Hierarchy Standard" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ FHS</div>
+<h2>FHS – Filesystem Hierarchy Standard</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a class="active" href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>FHS‑Ziel und Nutzen erläutern.</li><li>Wichtige Verzeichnisse sicher zuordnen.</li></ul></div></div>
+<div class="card block"><h3>Zusammenfassung</h3><div class="card-body">
+<p>Der Filesystem Hierarchy Standard (FHS) definiert Konventionen für die Verzeichnisstruktur unter Linux. Dadurch bleiben Systeme vorhersehbar und Scripts portabel.</p>
+<table>
+<tr><th>Pfad</th><th>Beschreibung</th></tr>
+<tr><td><code>/</code></td><td>Wurzel des Verzeichnisbaums</td></tr>
+<tr><td><code>/etc</code></td><td>Systemweite Konfiguration</td></tr>
+<tr><td><code>/usr</code></td><td>Systemprogramme, Bibliotheken, Dokumentation</td></tr>
+<tr><td><code>/var</code></td><td>Variable Daten (Logs, Spools)</td></tr>
+<tr><td><code>/home</code></td><td>Benutzerverzeichnisse</td></tr>
+<tr><td><code>/bin, /sbin</code></td><td>Essentielle Binaries für System/Boot (oft nach <code>/usr/bin</code> verlinkt)</td></tr>
+<tr><td><code>/lib, /lib64</code></td><td>Essentielle Bibliotheken (teils nach <code>/usr/lib*</code> verlinkt)</td></tr>
+<tr><td><code>/boot</code></td><td>Kernel, Initramfs, Bootloader‑Dateien</td></tr>
+<tr><td><code>/dev</code></td><td>Gerätedateien (udev generiert dynamisch)</td></tr>
+<tr><td><code>/proc, /sys</code></td><td>Pseudofs mit Kernel/Hardware‑Infos</td></tr>
+<tr><td><code>/run</code></td><td>flüchtige Laufzeitdaten (tmpfs)</td></tr>
+<tr><td><code>/tmp</code></td><td>Temporäre Dateien (i.d.R. beim Booten geleert)</td></tr>
+<tr><td><code>/srv</code></td><td>Daten von Diensten (z. B. Web, FTP)</td></tr>
+<tr><td><code>/opt</code></td><td>Optionale Zusatzsoftware (vendor‑spezifisch)</td></tr>
+<tr><td><code>/media, /mnt</code></td><td>Wechselmedien (automount), temporäre Mounts</td></tr>
+<tr><td><code>/root</code></td><td>Home‑Verzeichnis von root</td></tr>
+</table>
+</div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>man hier
+ls -l /
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Ordne reale Dateien den FHS‑Verzeichnissen zu.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Was ist der Zweck von <code>/usr</code> vs. <code>/bin</code>?</li></ol></div></div>
+<div class="card block"><h3>Theorie: FHS im Detail</h3><div class="card-body">
+<ul>
+<li><strong>/usr</strong>: Meist nur lesbar; enthält <code>/usr/bin</code>, <code>/usr/sbin</code>, <code>/usr/lib*</code>, <code>/usr/share</code>. Distribution‑Pakete installieren hier.</li>
+<li><strong>/etc</strong>: Konfiguration im Textformat; keine großen Daten, keine Binaries. Beispiele: <code>/etc/fstab</code>, <code>/etc/ssh/sshd_config</code>.</li>
+<li><strong>/var</strong>: Schreibintensiv: <code>/var/log</code>, <code>/var/spool</code>, <code>/var/lib</code> (persistente App‑Daten), <code>/var/cache</code>.</li>
+<li><strong>/tmp</strong> vs. <strong>/var/tmp</strong>: <code>/tmp</code> kurzlebig (oft beim Booten geleert), <code>/var/tmp</code> längerlebig.</li>
+<li><strong>/opt</strong>: Dritthersteller‑Software, Versionierung möglich: <code>/opt/VENDOR/produkt/</code>.</li>
+<li><strong>/srv</strong>: Daten, die von Diensten bereitgestellt werden, z. B. <code>/srv/www</code>.</li>
+<li><strong>/proc</strong>: Prozess/Kerneldaten; z. B. <code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, <code>/proc/sys</code> (sysctl).</li>
+<li><strong>/sys</strong>: sysfs (Geräte, Treiber, Klassen) – udev/hotplug.</li>
+<li><strong>/run</strong>: Laufzeit‑State (PIDs, Sockets); ersetzt alte Pfade in <code>/var/run</code>.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body"><pre><code># Überblick gewinnen (Top‑Level)
+tree -L 1 -a /
+
+# Zuordnen: welche Pakete liefern Dateien?
+dpkg -S /usr/bin/ls     # Debian/Ubuntu
+rpm -qf /usr/bin/ls     # RHEL/SUSE
+
+# Logs durchsuchen
+journalctl -b
+sudo tail -F /var/log/syslog   # Debian/Ubuntu
+sudo tail -F /var/log/messages # RHEL/SUSE
+
+# Temporäres Verzeichnis korrekt
+stat -c "%a %n" /tmp  # erwartet 1777 (sticky)
+
+# Systemweite Standards
+grep -R "^#\|^[^#]" -n /etc/default/ /etc/sysconfig/ 2&gt;/dev/null | head
+
+# Ort für Dienstdaten vorbereiten
+sudo install -d -o root -g root -m 0755 /srv/www
+</code></pre></div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Trennung Lesen/Schreiben:</strong> <code>/usr</code> read‑only möglich; App‑Daten in <code>/var/lib</code>, Service‑Daten in <code>/srv</code>.</li>
+<li><strong>Rechte &amp; Sticky Bits:</strong> <code>/tmp</code> und <code>/var/tmp</code> auf 1777; keine Welt‑schreibbaren Verzeichnisse ohne Sticky Bit.</li>
+<li><strong>Konfiguration versionieren:</strong> <code>/etc</code> (z. B. git‑Repo) mit Secrets‑Ausschlüssen.</li>
+<li><strong>Wechselmedien:</strong> unter <code>/media</code> (automount) statt wilde Pfade.</li>
+<li><strong>Vendor Software:</strong> in <code>/opt</code> sauber halten, keine Vermischung mit <code>/usr</code>.</li>
+</ul></div></div>
+<div class="card block"><h3>Fehlersuche</h3><div class="card-body"><ul>
+<li><strong>Vollgelaufenes <code>/var</code>:</strong> <code>du -xhd1 /var</code>, Logrotation prüfen (<code>logrotate</code>), Caches leeren (<code>apt clean</code>, <code>dnf clean all</code>).</li>
+<li><strong>Falsche Rechte auf <code>/tmp</code>:</strong> <code>sudo chmod 1777 /tmp</code>, <code>sudo chown root:root /tmp</code>.</li>
+<li><strong>Read‑only Root:</strong> Mountstatus mit <code>findmnt /</code>, dmesg prüfen; ggf. Notfall‑Remount <code>mount -o remount,rw /</code> (nur bewusst!).</li>
+<li><strong>Verwaiste PIDs/Sockets in <code>/run</code>:</strong> betroffenen Dienst neu starten; systemd pflegt <code>/run</code>.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># FHS Referenz
+man hier
+
+# Top 20 größte Verzeichnisse unter /
+sudo du -xhd1 / | sort -h | tail -20
+
+# Was gehört zu welchem Paket?
+dpkg -S /etc/ssh/sshd_config  || rpm -qf /etc/ssh/sshd_config
+
+# tmpfiles‑Regeln anzeigen
+systemd-tmpfiles --cat-config | less
+</code></pre></div></div>
+<div class="card block"><h3>Weitere Übungen</h3><div class="card-body"><ol>
+<li>Lege eine saubere Verzeichnisstruktur für einen Webdienst in <code>/srv/www</code> an und dokumentiere Rechte/Owner.</li>
+<li>Prüfe und korrigiere die Rechte von <code>/tmp</code> und <code>/var/tmp</code>. Erkläre die Sicherheitswirkung des Sticky Bits.</li>
+<li>Analysiere die größten 10 Verzeichnisse unter <code>/var</code> und entwickle eine Bereinigungsstrategie.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Worin unterscheiden sich <code>/usr</code> und <code>/opt</code> laut FHS?</li>
+<li>Wofür sind <code>/proc</code> und <code>/sys</code> gedacht und wie greifst du darauf zu?</li>
+<li>Warum sollte <code>/tmp</code> die Berechtigung 1777 besitzen?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="dateisystem-werkzeuge.html" rel="prev">← Vorherige Seite</a> · <a href="inodes-und-links.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

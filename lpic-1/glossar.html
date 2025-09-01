@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Glossar</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Glossar" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>ZeroX</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a href="../lpic-1/index.html">LPIC-1</a>
+<a href="../lpic-2/index.html">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="../lpic-1/index.html">LPIC‑1</a> ▸ Glossar</div>
+<h2>Glossar</h2><div class="card toc-auto"><div class="card-body"><h3>Inhaltsverzeichnis</h3><div class="toc"></div></div></div>
+<div class="card"><div class="card-body">
+<p class="muted">Ein kleines Nachschlagewerk zu häufigen Begriffen in LPIC‑1.</p>
+<dl class="glossary">
+<dt>Kernel</dt><dd>Der Kern des Betriebssystems, der Hardware verwaltet und Systemaufrufe bereitstellt.</dd>
+<dt>Distribution</dt><dd>Ein Paket aus Kernel, Tools und Paketverwaltung (z. B. Debian, Ubuntu, RHEL, openSUSE).</dd>
+<dt>Shell</dt><dd>Kommandozeilen‑Interpreter, z. B. bash oder zsh.</dd>
+<dt>Dateirechte</dt><dd>Lesen (r), Schreiben (w), Ausführen (x) für Besitzer, Gruppe, Andere.</dd>
+<dt>Paketverwaltung</dt><dd>Werkzeuge zur Installation/Aktualisierung von Software (apt, dnf, zypper, pacman).</dd>
+<dt>Prozess</dt><dd>Laufendes Programm, identifiziert durch PID.</dd>
+<dt>Dienst (Service)</dt><dd>Im Hintergrund laufender Prozess, oft über systemd verwaltet.</dd>
+<dt>Mount</dt><dd>Einbinden eines Dateisystems an einen Verzeichnispfad.</dd>
+<dt>GRUB</dt><dd>Bootloader, der Linux‑Kernel lädt.</dd>
+<dt>initramfs</dt><dd>Minimales Root‑Dateisystem, das zum Starten des Systems benötigt wird.</dd>
+</dl>
+</div></div>
+<div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div></main>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dateisystem‑Attribute</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Dateisystem‑Attribute" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Dateisystem‑Attribute</div>
+<h2>Dateisystem‑Attribute</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a class="active" href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Lernziele</h3>
+<div class="card-body">
+<ul>
+<li>Attribute auf ext‑Dateisystemen verstehen und mit <code>lsattr</code>/<code>chattr</code> sicher handhaben.</li>
+<li>Extended Attributes (xattr) kennen: Namensräume, typische Anwendungsfälle und Werkzeuge.</li>
+<li>Praxisfälle: Schreibschutz (<code>immutable</code>), Performance‑Flags und Prüfungen im Incident‑Fall.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Grundlagen: Dateisystem‑Attribute</h3>
+<div class="card-body">
+<p>Auf ext‑Familie (ext2/3/4) gibt es spezielle Dateiattribute, die das Verhalten von Dateien/Verzeichnissen beeinflussen. Sie sind <em>nicht</em> identisch mit klassischen POSIX‑Rechten. Gängige Attribute:</p>
+<ul>
+<li><code>i</code> (<strong>immutable</strong>): Datei/Verzeichnis kann nicht geändert, umbenannt, gelöscht oder verlinkt werden. Selbst Root muss das Attribut entfernen, bevor Änderungen möglich sind.</li>
+<li><code>a</code> (<strong>append only</strong>): Nur Anhängen ist erlaubt (Log‑Dateien, forensische Nutzung).</li>
+<li><code>S</code>: Synchronous Updates.</li>
+<li><code>d</code>: Wird von <code>dump</code> ignoriert.</li>
+</ul>
+<pre><code># Attribute anzeigen (ext‑Dateisysteme)
+lsattr -a /pfad/zur/datei
+
+# Attribute setzen/entfernen
+sudo chattr +i kritische.conf     # unveränderlich machen
+sudo chattr -i kritische.conf     # wieder änderbar
+sudo chattr +a /var/log/app.log   # nur anhängen
+</code></pre>
+<p><strong>Hinweis:</strong> Attribute gelten nur, wenn das Dateisystem sie unterstützt (z. B. ext4). Auf XFS/Btrfs existieren andere Mechanismen.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Extended Attributes (xattr)</h3>
+<div class="card-body">
+<p>Extended Attributes sind Key‑Value‑Paare, die Metadaten an Dateien/Verzeichnisse hängen. Gängige Namensräume:</p>
+<ul>
+<li><code>user.*</code>: frei für Anwendungen/Nutzer (z. B. Kommentare).</li>
+<li><code>security.*</code>: sicherheitsrelevant (z. B. SELinux Labels).</li>
+<li><code>system.*</code> und <code>trusted.*</code>: vom System oder privilegierten Prozessen verwendet.</li>
+</ul>
+<pre><code># Anzeigen und setzen (Paket: attr)
+getfattr -d datei.txt
+setfattr -n user.comment -v "OK" datei.txt
+getfattr -n user.comment datei.txt
+
+# Entfernen
+setfattr -x user.comment datei.txt
+</code></pre>
+<p><strong>Beispiel:</strong> Ein Deployment‑Prozess kann eine Prüfsumme/Build‑ID als <code>user.build_id</code> ablegen, um Versionen nachzuvollziehen.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Praxisleitfaden und Sicherheit</h3>
+<div class="card-body">
+<ul>
+<li><strong>Konfigurationsschutz:</strong> Setze <code>+i</code> auf besonders sensible Dateien (z. B. kritische Unit‑Files), aber dokumentiere dies, sonst schlagen Updates fehl.</li>
+<li><strong>Log‑Integrität:</strong> <code>+a</code> für Log‑Dateien, damit Einträge nur angehängt werden (forensisch hilfreich). Rotationsprozesse müssen das Attribut temporär entfernen/neu setzen.</li>
+<li><strong>Auditing:</strong> Prüfe Attribute bei Incident‑Response: Ungewöhnliche <code>+i</code>/<code>+a</code> Flags können auf Manipulation hindeuten.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Cheatsheet</h3>
+<div class="card-body">
+<pre><code># ext‑Attribute
+lsattr -a pfad
+chattr +i|-i pfad
+chattr +a|-a pfad
+
+# Extended Attributes
+getfattr -d pfad
+setfattr -n user.comment -v "text" pfad
+setfattr -x user.comment pfad
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen (mit Lösungshinweisen)</h3>
+<div class="card-body">
+<ol>
+<li>
+<p><strong>Immutable testen:</strong> Erzeuge eine Datei, setze <code>+i</code> und versuche sie zu löschen/umzubenennen.</p>
+<details><summary>Lösungshinweise</summary>
+<p><code>touch demo; sudo chattr +i demo; rm demo</code> schlägt fehl. Entferne mit <code>sudo chattr -i demo</code> und lösche erneut.</p>
+</details>
+</li>
+<li>
+<p><strong>Append‑only Logs:</strong> Aktiviere <code>+a</code> für eine Log‑Datei und teste das Verhalten.</p>
+<details><summary>Lösungshinweise</summary>
+<p><code>sudo chattr +a app.log</code>; <code>echo test &gt; app.log</code> schlägt fehl, <code>echo test &gt;&gt; app.log</code> funktioniert.</p>
+</details>
+</li>
+<li>
+<p><strong>xattr verwalten:</strong> Hinterlege einen Kommentar und lies ihn wieder aus.</p>
+<details><summary>Lösungshinweise</summary>
+<p><code>setfattr -n user.comment -v "OK" demo; getfattr -n user.comment demo</code>.</p>
+</details>
+</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen (Kurzcheck)</h3>
+<div class="card-body">
+<ol>
+<li>Was bewirkt das Attribut <code>i</code> und wie entfernst du es?</li>
+<li>Worin unterscheiden sich Dateiattribute (<code>chattr</code>) und Extended Attributes (<code>setfattr</code>)?</li>
+<li>Nenne typische Namensräume für xattr und je ein Beispiel.</li>
+</ol>
+</div>
+</div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="dateisystem-typen.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Mount &amp; /etc/fstab</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Mount &amp; /etc/fstab" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Mount &amp; fstab</div>
+<h2>Mount &amp; /etc/fstab</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a class="active" href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>Temporäres vs. persistentes Mounten.</li><li>fstab‑Felder und Optionen korrekt anwenden.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>lsblk -f
+sudo mount /dev/sdb1 /data
+sudo umount /data
+findmnt
+# /etc/fstab Beispiel
+UUID=xxxx-xxxx /data ext4 defaults,noatime 0 2
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Erstelle Mountpoint <code>/data</code> und trage ihn in <code>fstab</code> ein.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Wofür stehen die letzten beiden Zahlen in fstab?</li></ol></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<p><strong>Mount-Grundlagen:</strong> Geräte oder Subvolumes werden in das Verzeichnisbaum‑Hierarchy eingebunden. Temporär via <code>mount</code>, persistent via <code>/etc/fstab</code> oder systemd‑Units.</p>
+<ul>
+<li><strong>fstab‑Felder:</strong> <code>fs_spec</code> (Gerät/UUID/LABEL), <code>fs_file</code> (Mountpoint), <code>fs_vfstype</code>, <code>fs_mntops</code>, <code>fs_freq</code> (dump), <code>fs_passno</code> (fsck‑Reihenfolge).</li>
+<li><strong>Wichtige Optionen:</strong> <code>defaults</code>, <code>noatime</code>/<code>relatime</code>, <code>ro</code>/<code>rw</code>, <code>nosuid</code>, <code>nodev</code>, <code>noexec</code>, <code>uid</code>/<code>gid</code> (bei vfat/ntfs), <code>x-systemd.automount</code>.</li>
+<li><strong>systemd‑Integration:</strong> <code>systemd</code> generiert Mount‑Units aus fstab; Automount reduziert Boot‑Blocking.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body">
+<pre><code># Geräte identifizieren
+lsblk -f
+blkid
+
+# Temporär mounten
+sudo mkdir -p /data
+sudo mount -t ext4 -o noatime /dev/sdb1 /data
+findmnt /data
+
+# Persistenter Eintrag in /etc/fstab (UUID bevorzugt)
+UUID=xxxx-xxxx  /data  ext4  defaults,noatime  0 2
+
+# Automount mit systemd (fstab‑Option)
+UUID=xxxx-xxxx  /data  ext4  noatime,x-systemd.automount  0 2
+
+# CIFS/NFS Beispiele
+//server/share  /mnt/share  cifs  credentials=/root/cred,iocharset=utf8,vers=3.0,uid=1000,gid=1000  0  0
+server:/export  /mnt/nfs    nfs   rw,noatime,_netdev  0  0
+
+# Bind-Mounts
+mount --bind /var/log/app /srv/app/log
+echo "/var/log/app /srv/app/log none bind 0 0" &gt;&gt; /etc/fstab
+
+# Fehlerdiagnose
+journalctl -b -u systemd-remount-fs -u local-fs.target
+systemctl status mnt-share.mount
+</code></pre>
+</div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>UUID/LABEL nutzen:</strong> Stabiler als <code>/dev/sdX</code>, besonders bei wechselnder Reihenfolge.</li>
+<li><strong>Sicherheitsoptionen:</strong> Für untrusted Medien <code>nosuid,nodev,noexec</code> setzen.</li>
+<li><strong>Netzwerkdateisysteme:</strong> <code>_netdev</code> und ggf. <code>x-systemd.automount</code> verwenden.</li>
+<li><strong>Boot‑Robustheit:</strong> Für optionale Mounts <code>nofail</code> oder <code>x-systemd.device-timeout=</code> erwägen.</li>
+<li><strong>fstab testen:</strong> Mit <code>sudo mount -a</code> prüfen, bevor die Session geschlossen wird.</li>
+</ul></div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body"><ul>
+<li><strong>Mount schlägt beim Boot fehl:</strong> Prüfe <code>journalctl -b</code>, verwende <code>nofail</code> für optionale Devices, setze <code>_netdev</code> für NFS/CIFS.</li>
+<li><strong>Blockierte Unmounts:</strong> <code>lsof +f -- /mnt/point</code>, <code>fuser -vm /mnt/point</code>, dann Prozesse beenden. Notfalls <code>umount -l</code> (lazy) oder <code>umount -f</code> bei NFS.</li>
+<li><strong>Optionen greifen nicht:</strong> Effektive Optionen mit <code>findmnt -no OPTIONS /mnt/point</code> prüfen; remount via <code>mount -o remount,ro /mnt/point</code>.</li>
+<li><strong>Device‑Namen geändert:</strong> In <code>/etc/fstab</code> auf <code>UUID</code>/<code>LABEL</code> umstellen (<code>blkid</code>, <code>e2label</code>, <code>xfs_admin</code>).</li>
+<li><strong>systemd Unit fehlerhaft:</strong> <code>systemctl status data.mount</code>, Log mit <code>journalctl -u data.mount</code>, Unit‑Name aus Pfad ableiten (<code>/data</code> → <code>data.mount</code>).</li>
+</ul></div></div>
+<div class="card block"><h3>Sicherheit</h3><div class="card-body"><ul>
+<li><strong>Removable/Untrusted:</strong> <code>nodev,nosuid,noexec</code>. Bei Benutzer‑Mounts <code>user</code>/<code>users</code> in fstab.</li>
+<li><strong>setuid verhindern:</strong> <code>nosuid</code> setzt SUID/SGID außer Kraft.</li>
+<li><strong>Skript‑Ausführung verhindern:</strong> <code>noexec</code> blockiert direkte Ausführung (nicht absoluter Schutz).</li>
+<li><strong>Netzwerk‑Mounts:</strong> Für CIFS <code>credentials=/root/cred,vers=3.0,uid=...</code>; Berechtigungen strikt setzen (<code>0600</code> auf Cred‑Datei).</li>
+<li><strong>Privates tmp:</strong> Dienste ggf. mit PrivateTmp= (systemd) betreiben statt globale <code>/tmp</code> Freigabe.</li>
+</ul></div></div>
+<div class="card block"><h3>Cheatsheet: systemd Mount Units</h3><div class="card-body"><pre><code># Automount via fstab (einfach)
+UUID=xxxx-xxxx /data ext4 noatime,x-systemd.automount 0 2
+
+# Native Units (alternativ zu fstab)
+/etc/systemd/system/data.mount
+[Unit]
+Description=Mount /data
+
+[Mount]
+What=UUID=xxxx-xxxx
+Where=/data
+Type=ext4
+Options=noatime
+
+[Install]
+WantedBy=multi-user.target
+
+/etc/systemd/system/data.automount
+[Unit]
+Description=Automount /data
+
+[Automount]
+Where=/data
+
+[Install]
+WantedBy=multi-user.target
+
+# Aktivieren
+systemctl daemon-reload
+systemctl enable --now data.automount
+            </code></pre></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Aktive Mounts
+mount | column -t
+findmnt -t ext4,xfs
+
+# Optionen live prüfen
+findmnt -no OPTIONS /data
+
+# FS‑Check‑Reihenfolge (fs_passno): root=1, andere=2, 0=kein fsck
+
+# Systemd Mount‑Unit Name
+# /data -&gt; data.mount; /mnt/share -&gt; mnt-share.mount
+</code></pre></div></div>
+<div class="card block"><h3>Weitere Übungen</h3><div class="card-body"><ol>
+<li>Richte ein Automount für <code>/data</code> via fstab (<code>x-systemd.automount</code>) ein und beobachte das Verhalten mit <code>systemd-analyze blame</code>.</li>
+<li>Erstelle einen CIFS‑Mount mit Credential‑Datei und validiere Berechtigungen für UID/GID.</li>
+<li>Nutze einen Bind‑Mount für Logs in ein Applikationsverzeichnis und setze restriktive Optionen.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welche Wirkung hat <code>noatime</code> im Vergleich zu <code>relatime</code>?</li>
+<li>Wie verhält sich ein <code>required</code> Mount im Bootprozess gegenüber <code>nofail</code>?</li>
+<li>Warum sind UUIDs in Produktionsumgebungen vorzuziehen?</li>
+</ol></div></div>
+<div class="card block"><h3>Deep‑Dive: /etc/fstab Felder</h3><div class="card-body">
+<table>
+<tr><th>Feld</th><th>Name</th><th>Beschreibung</th><th>Beispiele</th></tr>
+<tr><td>1</td><td>fs_spec</td><td>Was wird gemountet (Gerät/UUID/LABEL/Netzpfad/Bind).</td><td><code>UUID=1234-ABCD</code>, <code>LABEL=DATA</code>, <code>//srv/share</code>, <code>/src/path</code> (bind)</td></tr>
+<tr><td>2</td><td>fs_file</td><td>Wohin (Mountpoint). Muss als Verzeichnis existieren (außer swap).</td><td><code>/data</code>, <code>/mnt/share</code>, <code>none</code> bei swap</td></tr>
+<tr><td>3</td><td>fs_vfstype</td><td>Dateisystemtyp.</td><td><code>ext4</code>, <code>xfs</code>, <code>btrfs</code>, <code>vfat</code>, <code>ntfs</code>, <code>cifs</code>, <code>nfs</code>, <code>swap</code></td></tr>
+<tr><td>4</td><td>fs_mntops</td><td>Komma‑getrennte Optionen.</td><td><code>defaults,noatime</code>, <code>ro</code>, <code>uid=1000</code>, <code>x-systemd.automount</code></td></tr>
+<tr><td>5</td><td>fs_freq</td><td>Dump (veraltet). 0=kein Dump.</td><td><code>0</code></td></tr>
+<tr><td>6</td><td>fs_passno</td><td>fsck‑Reihenfolge. root=1, weitere=2, 0=nie prüfen.</td><td><code>1</code>/<code>2</code>/<code>0</code></td></tr>
+</table>
+<p class="muted">Hinweis: Bei nicht lokalen FS (NFS/CIFS) ist <code>_netdev</code> empfehlenswert, damit systemd auf Netzwerk wartet.</p>
+</div></div>
+<div class="card block"><h3>Optionen‑Katalog (Auswahl)</h3><div class="card-body">
+<table>
+<tr><th>Option</th><th>Gilt für</th><th>Wirkung</th><th>Kommentar</th></tr>
+<tr><td><code>defaults</code></td><td>alle</td><td>rw,suid,dev,exec,auto,nouser,async</td><td>Basis, oft ergänzt</td></tr>
+<tr><td><code>ro</code>/<code>rw</code></td><td>alle</td><td>Read‑only/Read‑write</td><td>Für Forensik/Recovery <code>ro</code></td></tr>
+<tr><td><code>noatime</code>/<code>relatime</code></td><td>lokal</td><td>Reduziert atime‑Writes</td><td><code>relatime</code> ist meist Default</td></tr>
+<tr><td><code>nosuid</code></td><td>alle</td><td>Ignoriert SUID/SGID</td><td>Sicherheit für untrusted Medien</td></tr>
+<tr><td><code>nodev</code></td><td>alle</td><td>Block/Char‑Devices ignorieren</td><td>Nicht auf echten /dev</td></tr>
+<tr><td><code>noexec</code></td><td>alle</td><td>Keine direkte Ausführung</td><td>Umgehbar über Interpreten</td></tr>
+<tr><td><code>uid=</code>/<code>gid=</code></td><td>vfat,ntfs,cifs</td><td>Besitz für nicht‑POSIX FS</td><td>Rechteabbildung</td></tr>
+<tr><td><code>x-systemd.automount</code></td><td>alle</td><td>On‑Demand‑Automount</td><td>Boot beschleunigen</td></tr>
+<tr><td><code>nofail</code></td><td>alle</td><td>Boot fährt fort bei Fehler</td><td>Für optionale Mounts</td></tr>
+<tr><td><code>user</code>/<code>users</code></td><td>alle</td><td>Benutzer dürfen mounten</td><td>Mit Vorsicht; Sicherheit prüfen</td></tr>
+<tr><td><code>_netdev</code></td><td>netz</td><td>Markiert Netzwerkabhängigkeit</td><td>Wartet auf Netzwerk</td></tr>
+</table>
+</div></div>
+<div class="card block"><h3>Mapping: fstab → systemd Units</h3><div class="card-body">
+<ul>
+<li><strong>Mount‑Unit:</strong> Pfad <code>/data</code> → Unit <code>data.mount</code>. Aus fstab generiert oder als native Unit.</li>
+<li><strong>Automount‑Unit:</strong> <code>x-systemd.automount</code> erzeugt <code>data.automount</code> und bindet on‑access ein.</li>
+<li><strong>Abhängigkeiten:</strong> <code>Requires=</code>/<code>After=</code> werden implizit gesetzt (z. B. <code>local-fs.target</code>, <code>remote-fs.target</code> bei <code>_netdev</code>).</li>
+<li><strong>Debugging:</strong> <code>systemctl status data.mount</code>, <code>journalctl -u data.mount -b</code>, <code>systemd-analyze critical-chain</code>.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Netzwerkdateisysteme (NFS/CIFS) – Details</h3><div class="card-body">
+<h4>NFS</h4>
+<ul>
+<li><code>vers=3/4/4.1</code> wählen; v4+ bevorzugt (Stateful, ACLs).</li>
+<li><code>timeo</code>, <code>retrans</code>, <code>hard/soft</code>, <code>intr</code> verstehen; Server‑Side Export‑Optionen (<code>sync</code>, <code>no_root_squash</code> vermeiden).</li>
+</ul>
+<pre><code>server:/export  /mnt/nfs  nfs  rw,vers=4.2,_netdev,noatime  0  0
+findmnt -T /mnt/nfs -o SOURCE,FSTYPE,OPTIONS
+            </code></pre>
+<h4>CIFS (SMB)</h4>
+<ul>
+<li><code>vers=3.0+</code> nutzen, <code>credentials=</code>-Datei mit 0600.</li>
+<li>Optionen für Rechteabbildung: <code>uid=</code>, <code>gid=</code>, <code>file_mode=</code>, <code>dir_mode=</code>.</li>
+</ul>
+<pre><code>//srv/share  /mnt/share  cifs  credentials=/root/.cifs,vers=3.1.1,uid=1000,gid=1000,file_mode=0640,dir_mode=0750,_netdev  0  0
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Edge‑Cases &amp; Szenarien</h3><div class="card-body">
+<ul>
+<li><strong>Verschlüsselung:</strong> LUKS/LVM → entsperren per <code>/etc/crypttab</code>; Mount erst danach. TRIM: <code>discard</code> vs. periodisches <code>fstrim.timer</code>.</li>
+<li><strong>Initramfs:</strong> Root‑FS Änderungen erfordern oft <code>update-initramfs -u</code> bzw. <code>dracut -f</code>.</li>
+<li><strong>Container/Chroot:</strong> Bind‑Mounts und <code>nosuid,nodev,noexec</code> innerhalb Jails sinnvoll.</li>
+<li><strong>Temporäre FS:</strong> <code>tmpfs</code> für <code>/run</code>/<code>/tmp</code> dimensionieren: <code>size=</code>, <code>mode=1777</code>.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz" id="quiz-mount-1">
+<div class="quiz-question">Welche Kombination macht einen optionalen Netzwerk‑Mount boot‑robust?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qm1" type="radio"/> noexec,ro</label>
+<label class="quiz-option" data-correct="1"><input name="qm1" type="radio"/> _netdev,nofail,x-systemd.automount</label>
+<label class="quiz-option"><input name="qm1" type="radio"/> defaults,commit=60</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+<div class="quiz" id="quiz-mount-2">
+<div class="quiz-question">Wofür stehen die Felder 5 und 6 in der fstab?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qm2" type="radio"/> 5=fsck‑Prio, 6=Dump</label>
+<label class="quiz-option" data-correct="1"><input name="qm2" type="radio"/> 5=Dump‑Flag, 6=fsck‑Reihenfolge</label>
+<label class="quiz-option"><input name="qm2" type="radio"/> 5=UID, 6=GID</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+<div class="card block"><h3>Praxis‑Lab</h3><div class="card-body">
+<ol class="exercise-steps">
+<li>Erstelle <code>/data</code>, mounte testweise ein Loop‑Image als ext4 und trage es in <code>fstab</code> ein.</li>
+<li>Aktiviere <code>x-systemd.automount</code> und beobachte Mounts mit <code>systemctl status</code> und <code>findmnt</code>.</li>
+<li>Simuliere Boot‑Fehler (falsche UUID) und stelle Robustheit mit <code>nofail</code> her. Dokumentiere Logs (<code>journalctl -b</code>).</li>
+</ol>
+<details class="solution"><summary>Lösungsidee</summary><pre><code># Loop‑Image
+sudo dd if=/dev/zero of=/root/data.img bs=1M count=512
+sudo mkfs.ext4 -L loopdata /root/data.img
+sudo mkdir -p /data
+sudo mount -o loop /root/data.img /data
+findmnt /data
+
+# fstab (Label)
+LABEL=loopdata /data ext4 noatime,x-systemd.automount 0 2
+sudo mount -a
+            </code></pre></details>
+</div></div>
+<div class="card block"><h3>Sicherheits‑Policies (Beispiele)</h3><div class="card-body">
+<ul>
+<li><strong>Wechselmedien:</strong> Standardmäßig <code>nodev,nosuid,noexec</code> setzen.</li>
+<li><strong>Benutzer‑Mounts:</strong> Nur ausgewählte Mountpoints mit <code>user</code>/<code>users</code>, restriktive <code>uid/gid</code>, keine SUID‑Binaries.</li>
+<li><strong>Netz‑Shares:</strong> Credentials getrennt (0600), minimal notwendige Rechte, <code>vers=3.1.1</code> bei CIFS.</li>
+</ul>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="mount-optionen-und-sicherheit.html" rel="prev">← Vorherige Seite</a> · <a href="partitionen-und-swap.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

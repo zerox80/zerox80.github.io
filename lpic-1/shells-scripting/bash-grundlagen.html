@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Bash-Grundlagen – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Bash-Grundlagen – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../shells-scripting.html">Shells &amp; Scripting</a> · Bash-Grundlagen</div>
+<h2>Bash-Grundlagen</h2>
+<p class="muted">Interaktive Nutzung, Hilfe, History, Quoting, Globbing und Pipes – die Basis für effiziente Shell-Arbeit.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px">
+<h3>LPIC-1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a class="active" href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</div>
+<div class="card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a class="active" href="bash-grundlagen.html">Bash-Grundlagen</a>
+<a href="variablen-und-umgebungsvariablen.html">Variablen &amp; Umgebungsvariablen</a>
+<a href="kontrollstrukturen.html">Kontrollstrukturen</a>
+<a href="funktionen-und-skripte.html">Funktionen &amp; Skripte</a>
+<a href="textverarbeitung-grep-sed-awk.html">Textverarbeitung: grep, sed, awk</a>
+<a href="regulare-ausdruecke.html">Reguläre Ausdrücke</a>
+<a href="jobsteuerung-und-prozesse.html">Jobsteuerung &amp; Prozesse</a>
+<a href="shebang-und-ausfuehrbarkeit.html">Shebang &amp; Ausführbarkeit</a>
+<a href="debugging-und-tracing.html">Debugging &amp; Tracing</a>
+<a href="best-practices.html">Best Practices</a>
+</nav>
+</div>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Lernziele</h3>
+<div class="card-body">
+<ul>
+<li>Bash-Session effizient nutzen (History, Completion, Jobsteuerung).</li>
+<li>Korrektes Quoting (single vs. double), Globbing und Pipes sicher verstehen.</li>
+<li>Hilfe abrufen (man, help, --help) und Oneliner lesen/schreiben.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Grundlagen</h3>
+<div class="card-body">
+<p>Die Bash verbindet Programme über <strong>Pipes</strong> (<code>|</code>), leitet Ein-/Ausgabe um (<code>&gt;</code>, <code>&gt;&gt;</code>, <code>&lt;</code>) und nutzt <strong>Globbing</strong> (Mustermatching wie <code>*.log</code>). <strong>Quoting</strong> steuert, wie die Shell Zeichen interpretiert:</p>
+<ul>
+<li><code>'single quotes'</code>: wörtlich, kein Variablen-/Kommandosubstitution.</li>
+<li><code>"double quotes"</code>: Variablen/Kommandosubstitution erlaubt, Globs deaktiviert.</li>
+<li><code>\</code> (Escape): Das nächste Zeichen wörtlich nehmen.</li>
+</ul>
+<p><strong>Hilfesysteme:</strong> <code>man ls</code>, <code>ls --help</code>, <code>help cd</code>. Nutze <code>apropos</code> und <code>whatis</code>, um Seiten zu finden.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Cheatsheet</h3>
+<div class="card-body">
+<pre><code># Navigation &amp; Hilfe
+pwd; cd /etc; cd -
+man find | less
+whatis tar; apropos archive
+
+# Globbing &amp; Pipes
+ls *.log | wc -l
+printf '%s\n' **/*.conf 2&gt;/dev/null | head -n 20
+
+# Umleitungen
+cmd &gt; out.txt 2&gt; err.txt
+cmd &gt;&gt; out.txt 2&gt;&amp;1    # anhängen, stdout+stderr zusammen
+
+# History &amp; Kurzbefehle
+history | tail
+!!         # letzten Befehl wiederholen
+!f         # letzten Befehl, der mit f beginnt
+^alt^neu   # Schnellersetzung (interaktiv)
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Praxisbeispiele</h3>
+<div class="card-body">
+<pre><code># Größte 10 Dateien unter /var finden
+sudo du -ah /var 2&gt;/dev/null | sort -h | tail -n 10
+
+# Logzeilen der letzten Stunde
+journalctl --since '-1h' | grep -iE 'error|fail'
+
+# Dateien mit Leerzeichen sicher iterieren
+while IFS= read -r -d '' f; do
+  echo "Gefunden: $f"
+done &lt; &lt;(find . -type f -name '*.sh' -print0)
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen</h3>
+<div class="card-body">
+<ol>
+<li>Finde alle <code>.service</code>-Dateien unter <code>/etc</code> und zähle sie. Gib die 5 alphabetisch letzten aus.</li>
+<li>Liste die 10 größten Dateien in <code>/home</code> – ignoriere Zugriffsfehler.</li>
+<li>Erkläre den Unterschied zwischen <code>'$HOME'</code> und <code>"$HOME"</code>.</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen</h3>
+<div class="card-body">
+<ol>
+<li>Was ist der Unterschied zwischen Pipe und Umleitung?</li>
+<li>Welche Sonderzeichen beeinflussen Globbing? Wie deaktivierst du es?</li>
+<li>Wie findest du heraus, ob <code>cd</code> ein Shell-Builtin ist?</li>
+</ol>
+</div>
+</div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Shell-Workflows &amp; Scripting.</p>
+<pre><code>#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+# Funktionen &amp; Fehlerbehandlung
+log() { printf '[%s] %s\n' "$(date +%T)" "$*"; }
+trap 'echo "Fehler in Zeile $LINENO" &gt;&amp;2' ERR
+
+# Parameter &amp; Defaults
+name=${1:-world}
+log "Hallo $name"
+
+# Pipes &amp; Prozesssubstitution
+awk -F: '{print $1}' /etc/passwd | sort | uniq
+comm -13 &lt;(cut -d: -f1 alt.txt | sort) &lt;(cut -d: -f1 neu.txt | sort)
+
+# grep/sed/awk Patterns
+grep -E '^(UID|GID)=' /etc/login.defs
+sed -n '1,10p' datei
+awk '$3 &gt;= 1000 {print $1,$3}' FS=: OFS='\t' /etc/passwd
+</code></pre>
+<h4>Best Practices</h4><ul><li><code>shellcheck</code> gegen häufige Fehler nutzen.</li><li>Niemals ungequotete Variablen in Globs/Word-Splitting (<code>"$var"</code>).</li><li>Klare Exit-Codes und <code>set -e</code> bewusst einsetzen.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>bash</code></td><td>set -Eeuo pipefail; trap ERR; Funktionen, Arrays, getopts</td></tr>
+<tr><td><code>grep</code></td><td>-E regulär; -r rekursiv; -n Zeilen; -i Case-insensitiv; -v invert</td></tr>
+<tr><td><code>sed</code></td><td>-n p drucken; s/alt/neu/g ersetzen; -E erweiterte Regex; -i inline-edit</td></tr>
+<tr><td><code>awk</code></td><td>-F Feldtrenner; OFS Ausgabe; NR/NR==1 Kopf; $1..$NF Spalten</td></tr>
+<tr><td><code>xargs</code></td><td>-0 mit NUL; -n Anzahl; -P Parallelität</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Schnelle Datenbereinigung mit find -mtime +30 -delete (mit Trockentest).</li>
+<li>Log‑Analyse: journalctl -u dienst | grep -E 'ERROR|WARN'.</li>
+<li>CSV veredeln: awk -F, 'NR&gt;1{sum+=$3} END{print sum}' data.csv.</li>
+<li>Bash‑Script mit robustem Fehlerhandling &amp; set -Eeuo pipefail.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Bash‑Strict‑Mode aktiv? (set -Eeuo pipefail)</li>
+<li>Variablen richtig gequotet? ("$var")</li>
+<li>Pipelines geben Exit‑Codes korrekt weiter? (pipefail)</li>
+<li>Regex/FS korrekt gesetzt? (-E, -F, OFS)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Schnelle Datenbereinigung mit find -mtime +30 -delete (mit Trockentest). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Log‑Analyse: journalctl -u dienst | grep -E 'ERROR|WARN'. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>CSV veredeln: awk -F, 'NR&gt;1{sum+=$3} END{print sum}' data.csv. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Bash‑Script mit robustem Fehlerhandling &amp; set -Eeuo pipefail. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Bash Strict Mode &amp; Texttools
+set -Eeuo pipefail
+trap 'echo Fehler in Zeile $LINENO &gt;&amp;2' ERR
+grep -En '^(UID|GID)=' /etc/login.defs
+sed -n '1,10p' datei
+awk -F: '$3&gt;=1000{print $1,$3}' OFS='\t' /etc/passwd</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="best-practices.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer">
+<div class="container">
+<span>© Linux Lernportal</span>
+</div>
+</footer>
+</body>
+</html>

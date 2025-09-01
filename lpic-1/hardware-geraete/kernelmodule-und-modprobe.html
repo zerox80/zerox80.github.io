@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Kernelmodule &amp; modprobe – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Kernelmodule &amp; modprobe – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../hardware-geraete.html">Hardware &amp; Geräte</a> · Kernelmodule</div>
+<h2>Kernelmodule &amp; modprobe</h2>
+<p class="muted">Module laden, Parameter setzen, Blacklisting und Troubleshooting.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a class="active" href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc subtopics">
+<a class="active" href="kernelmodule-und-modprobe.html">Kernelmodule &amp; modprobe</a>
+<a href="udev-und-regeln.html">udev &amp; Regeln</a>
+<a href="blockgeraete-lsblk-udevadm.html">Blockgeräte &amp; udevadm</a>
+<a href="geraetetreiber-uebersicht.html">Gerätetreiber: Überblick</a>
+<a href="drucker-scanner-cups.html">Drucker/Scanner (CUPS)</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>Module laden/entladen: <code>modprobe</code>, <code>lsmod</code>, <code>rmmod</code>.</li>
+<li>Parameter prüfen: <code>modinfo</code>, Persistenz in <code>/etc/modprobe.d/*.conf</code>.</li>
+<li>Blacklist und Soft-Dependencies.</li>
+</ul></div></div>
+<div class="card block"><h3>Überblick &amp; Architektur</h3><div class="card-body">
+<p>Kernelmodule (<code>.ko</code>) liegen unter <code>/lib/modules/$(uname -r)/</code>. <code>modprobe</code> lädt Module inkl. Abhängigkeiten anhand von <code>modules.dep</code> (<code>depmod</code> generiert diese). Geladene Module siehst du in <code>lsmod</code>; zu jedem Modul existiert <code>/sys/module/&lt;mod&gt;/</code> mit <code>parameters/</code>, <code>refcnt</code> u. a.</p>
+<ul>
+<li><strong>Parameter:</strong> <code>modinfo &lt;mod&gt;</code> zeigt <em>parm:</em>; live unter <code>/sys/module/&lt;mod&gt;/parameters/*</code>.</li>
+<li><strong>Konfiguration:</strong> <code>/etc/modprobe.d/*.conf</code> für <code>options</code>, <code>blacklist</code>, <code>softdep</code>.</li>
+<li><strong>Built‑ins:</strong> Fest in den Kernel kompiliert; erscheinen nicht in <code>lsmod</code> und sind nicht entladbar.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Module laden, entladen und konfigurieren</h3><div class="card-body">
+<pre><code>lsmod | head
+modinfo e1000e | less
+sudo modprobe e1000e InterruptThrottleRate=3000
+echo 'options e1000e InterruptThrottleRate=3000' | sudo tee /etc/modprobe.d/e1000e.conf
+sudo rmmod e1000e &amp;&amp; sudo modprobe e1000e
+
+# Blacklist
+echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/blacklist-pcspkr.conf
+
+# Abhängigkeiten neu aufbauen (nach manueller Modul-Installation)
+sudo depmod -a
+
+# Initramfs aktualisieren (Distribution-spezifisch)
+sudo update-initramfs -u   # Debian/Ubuntu
+sudo dracut -f             # RHEL/Fedora/Alma/Rocky
+</code></pre>
+</div></div>
+<div class="card block"><h3>Parameter &amp; Persistenz</h3><div class="card-body">
+<ul>
+<li><strong>Auflisten:</strong> <code>modinfo &lt;mod&gt;</code> zeigt <em>parm:</em>-Zeilen (Parametername und Beschreibung).</li>
+<li><strong>Temporär:</strong> <code>sudo modprobe &lt;mod&gt; name=value</code>.</li>
+<li><strong>Dauerhaft:</strong> <code>/etc/modprobe.d/*.conf</code> mit <code>options &lt;mod&gt; name=value</code>.</li>
+<li><strong>Runtime:</strong> <code>/sys/module/&lt;mod&gt;/parameters/*</code> lesen/ändern (falls beschreibbar).</li>
+</ul>
+<pre><code>modinfo iwlwifi | grep '^parm'
+sudo modprobe iwlwifi power_save=0
+echo 'options iwlwifi power_save=0' | sudo tee /etc/modprobe.d/wlan.conf
+cat /sys/module/iwlwifi/parameters/power_save
+</code></pre>
+</div></div>
+<div class="card block"><h3>Blacklisting &amp; Soft-Dependencies</h3><div class="card-body">
+<p><code>blacklist &lt;mod&gt;</code> verhindert das automatische Laden über Aliases/Hotplug, <em>nicht</em> den manuellen Aufruf <code>modprobe &lt;mod&gt;</code>. Für ein hartes Verhindern kann <code>install &lt;mod&gt; /bin/false</code> genutzt werden.</p>
+<pre><code># Blacklist / harte Sperre
+echo 'blacklist nouveau' | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
+echo 'install nouveau /bin/false' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
+
+# Softdep: Lade-Reihenfolge festlegen
+echo 'softdep snd_hda_intel pre: snd snd_pcm post: snd_seq' | sudo tee /etc/modprobe.d/sound-softdep.conf
+</code></pre>
+</div></div>
+<div class="card block"><h3>Initramfs &amp; Boot</h3><div class="card-body">
+<p>Treiber, die früh im Boot-Prozess benötigt werden (z. B. Storage/RAID), müssen im Initramfs enthalten sein. Nach Änderungen an Modulen/Firmware das Initramfs erneuern und prüfen.</p>
+<pre><code>sudo update-initramfs -u           # Debian/Ubuntu
+sudo dracut -f                     # RHEL/Fedora/Alma/Rocky
+lsinitramfs /boot/initrd.img-$(uname -r) | grep e1000e || true
+</code></pre>
+</div></div>
+<div class="card block"><h3>Debugging &amp; Logs</h3><div class="card-body">
+<pre><code>dmesg -Tw | grep -iE 'firmware|module|error'
+journalctl -k -b | less
+modprobe -v e1000e
+modprobe --first-time nonexistent 2&gt;&amp;1 | sed -n '1,10p'
+modprobe -c | less      # Zusammengeführte modprobe-Konfiguration inkl. Aliases
+</code></pre>
+<div class="admonition warning"><div class="admonition-title">Hinweis</div><div class="admonition-body"><p><code>rmmod -f</code> erzwingt ein Entladen und ist risikobehaftet. Verwende es nur, wenn du die Folgen kennst.</p></div></div>
+</div></div>
+<div class="card block"><h3>Praxisübungen</h3><div class="card-body">
+<ol class="exercise-steps">
+<li>Lade ein Modul mit temporärem Parameter und überprüfe die Wirkung (<code>modinfo</code> + <code>/sys/module</code>).</li>
+<li>Setze denselben Parameter persistent in <code>/etc/modprobe.d/</code> und teste nach Re‑Load.</li>
+<li>Blacklist ein nicht benötigtes Modul und verifiziere das Verhalten bei Reboots/Hotplug.</li>
+<li>Ermittle Abhängigkeiten eines Moduls und erkläre kurz, welche automatisch geladen werden.</li>
+</ol>
+<details class="solution"><summary>Lösungen/Beispielwege anzeigen</summary>
+<p><strong>1)</strong> <code>sudo modprobe e1000e InterruptThrottleRate=3000</code>; prüfen via <code>cat /sys/module/e1000e/parameters/InterruptThrottleRate</code>.</p>
+<p><strong>2)</strong> <code>echo 'options e1000e InterruptThrottleRate=3000' | sudo tee /etc/modprobe.d/e1000e.conf</code>, dann <code>sudo modprobe -r e1000e &amp;&amp; sudo modprobe e1000e</code>.</p>
+<p><strong>3)</strong> <code>echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/blacklist-pcspkr.conf</code>; Autoload unterbleibt, manuelles <code>modprobe pcspkr</code> ist weiterhin möglich.</p>
+<p><strong>4)</strong> <code>modinfo -F depends e1000e</code>; <code>modprobe</code> lädt Abhängigkeiten automatisch gem. <code>modules.dep</code>.</p>
+</details>
+</div></div>
+<div class="card block quiz"><div class="card-body">
+<div class="quiz-question">Welche Aussagen zu Kernelmodulen stimmen? <em>(Mehrfachauswahl)</em></div>
+<div class="quiz-options">
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span><code>modinfo</code> zeigt <em>parm:</em>-Zeilen, Firmware- und Alias-Infos.</span></label>
+<label class="quiz-option" data-correct="0"><input type="checkbox"/> <span><code>blacklist &lt;mod&gt;</code> verhindert auch das manuelle Laden per <code>modprobe</code>.</span></label>
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span>Persistente Parameter definiert man in <code>/etc/modprobe.d/*.conf</code> via <code>options &lt;mod&gt; name=value</code>.</span></label>
+<label class="quiz-option" data-correct="1"><input type="checkbox"/> <span>Aktuelle Parameter eines geladenen Moduls finden sich unter <code>/sys/module/&lt;mod&gt;/parameters/</code>.</span></label>
+</div>
+<div class="quiz-actions">
+<button class="btn check-quiz">Prüfen</button>
+<button class="btn reset-quiz">Zurücksetzen</button>
+</div>
+<div class="quiz-feedback"></div>
+</div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body">
+<table>
+<thead><tr><th>Befehl</th><th>Zweck</th></tr></thead>
+<tbody>
+<tr><td><code>lsmod</code></td><td>Liste geladener Module</td></tr>
+<tr><td><code>modinfo &lt;mod&gt;</code></td><td>Metadaten und Parameter (<em>parm:</em>)</td></tr>
+<tr><td><code>modprobe &lt;mod&gt; [name=val]</code></td><td>Modul (mit Parametern) laden</td></tr>
+<tr><td><code>modprobe -r &lt;mod&gt;</code></td><td>Modul entladen</td></tr>
+<tr><td><code>depmod -a</code></td><td>Abhängigkeitsdatenbank neu erstellen</td></tr>
+<tr><td><code>modprobe -c</code></td><td>Zusammengeführte Modprobe‑Konfiguration anzeigen</td></tr>
+<tr><td><code>/etc/modprobe.d/*.conf</code></td><td>Parameter/Blacklisting/Softdeps</td></tr>
+<tr><td><code>update-initramfs -u</code></td><td>Initramfs (Debian/Ubuntu) aktualisieren</td></tr>
+<tr><td><code>dracut -f</code></td><td>Initramfs (RHEL/Fedora‑Familie) aktualisieren</td></tr>
+</tbody>
+</table>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Wie listest du die Parameter eines Moduls auf?</li>
+<li>Wie setzt du Modulparameter dauerhaft?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="geraetetreiber-uebersicht.html" rel="prev">← Vorherige Seite</a> · <a href="udev-und-regeln.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

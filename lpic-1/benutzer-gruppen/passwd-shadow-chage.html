@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>passwd, shadow, chage – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="passwd, shadow, chage – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a> · passwd/shadow/chage</div>
+<h2>passwd, shadow, chage</h2>
+<p class="muted">Passwörter sicher setzen, Ablauf steuern und Policy prüfen.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a class="active" href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="useradd-usermod-userdel.html">useradd, usermod, userdel</a>
+<a class="active" href="passwd-shadow-chage.html">passwd, shadow, chage</a>
+<a href="groups-und-gpasswd.html">groups &amp; gpasswd</a>
+<a href="sudoers-und-visudo.html">sudoers &amp; visudo</a>
+<a href="pam-grundlagen.html">PAM-Grundlagen</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>Passwörter setzen/erzwingen, Ablaufdaten konfigurieren.</li>
+<li><code>/etc/passwd</code> und <code>/etc/shadow</code> Felder verstehen.</li>
+<li>Policy über <code>login.defs</code> und <code>pam</code>-Module beeinflussen (Überblick).</li>
+</ul></div></div>
+<div class="card block"><h3>Grundlagen</h3><div class="card-body">
+<pre><code># Passwort setzen / Sperren
+passwd alice
+passwd -l alice     # sperren (Lock)
+passwd -u alice     # entsperren
+
+# Alterung / Ablauf
+chage -l alice
+chage -M 90 -m 10 -W 7 alice
+
+# Dateien
+getent passwd alice
+sudo vipw; sudo vipw -s   # Editoren für passwd/shadow
+</code></pre>
+<p><strong>/etc/shadow</strong>: <code>login:hash:lastchg:min:max:warn:inactive:expire:reserved</code>. Moderne Hashes: <code>yescrypt</code>, <code>SHA-512</code> (je nach Distribution).</p>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welche Bedeutung hat das <code>!</code> im Passwortfeld der <code>/etc/shadow</code>?</li>
+<li>Wie setzt du die maximale Gültigkeit eines Passworts auf 90 Tage?</li>
+</ol></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<p><strong>/etc/passwd</strong>: <code>login:x:uid:gid:gecos:home:shell</code> (Passworthash seit langem nicht mehr hier, sondern in <code>/etc/shadow</code>).</p>
+<p><strong>/etc/shadow</strong>: <code>login:hash:lastchg:min:max:warn:inactive:expire:reserved</code></p>
+<ul>
+<li><code>hash</code>: <code>!hash</code> gesperrt, <code>*</code> kein Login via Passwort, <code>!*</code> häufig Systemkonten.</li>
+<li><code>lastchg</code>: Tage seit 1.1.1970; <code>-1</code> kann „nie geändert“ bedeuten (distroabhängig).</li>
+<li><code>min/max/warn/inactive/expire</code>: Mindest-/Maximalalter, Vorwarnzeit, Inaktivität nach Ablauf, absolutes Ablaufdatum (Tage seit Epoch).</li>
+</ul>
+<p><strong>Hash-Verfahren</strong>: Moderne Distros nutzen <code>yescrypt</code> oder <code>$6$</code> (SHA‑512). Steuerbar via <code>/etc/login.defs</code> bzw. PAM (<code>pam_unix.so</code> Optionen).</p>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body">
+<pre><code># Konto sperren/entsperren (Passwortlogin)
+passwd -l alice   # setzt '!' vor den Hash
+passwd -u alice
+
+# Passwort zurücksetzen &amp; Ablauf erzwingen
+passwd -e alice   # Ablauf sofort, Änderung beim nächsten Login
+
+# Aging gezielt setzen
+chage -M 90 -m 10 -W 7 alice   # max 90, min 10, Warnung 7
+chage -I 14 alice              # inaktiv nach Ablauf: 14 Tage
+chage -E 2025-12-31 alice      # absolutes Ablaufdatum
+
+# Systemweite Defaults (Distribution variabel)
+grep -E 'PASS_MAX_DAYS|PASS_MIN_DAYS|PASS_WARN_AGE' /etc/login.defs
+
+# Shadow-Felder interpretieren
+sudo chage -l alice
+</code></pre>
+</div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Kontosperre vs. Shell:</strong> Für Dienstkonten Login durch <code>!</code> im Hash sperren statt Shell auf <code>/usr/sbin/nologin</code> zu setzen – oder beides.</li>
+<li><strong>Erzwungene Rotation:</strong> Mit <code>chage -M</code> etablieren, aber Mindestalter <code>-m</code> gegen Sofortwechsel beachten.</li>
+<li><strong>Dokumentation:</strong> Änderungen an Konten (Sperren/Ablauf) nachvollziehbar festhalten.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Sofortige Passwortänderung erzwingen
+passwd -e USER
+
+# Konto vollständig sperren (auch ohne Passwort)
+usermod -L USER  # setzt '!' vor Hash
+usermod -U USER
+
+# Absolutes Ablaufdatum entfernen
+chage -E -1 USER
+
+# Prüfen, ob Passwort-Login möglich
+passwd -S USER   # Status-Zeile
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Setze für <code>bob</code> eine Policy: max 60 Tage, min 7 Tage, Warnung 5 Tage. Erzwinge eine sofortige Änderung.</li>
+<li>Sperre <code>service1</code> gegen Passwortlogin und dokumentiere die Änderung.</li>
+<li>Setze ein absolutes Ablaufdatum in 120 Tagen und verifiziere es mit <code>chage -l</code>.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welchen Effekt hat <code>passwd -e USER</code> und wo spiegelt er sich in <code>/etc/shadow</code> wider?</li>
+<li>Wie entfernst du ein gesetztes Ablaufdatum vollständig?</li>
+<li>Worin unterscheiden sich <code>usermod -L</code> und das Setzen der Login-Shell auf <code>/usr/sbin/nologin</code>?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Benutzer- und Gruppenverwaltung.</p>
+<ul><li>Benutzer-Lebenszyklus: anlegen → Passwort setzen → Gruppenmitgliedschaften → Shell/Home → Ablaufdatum → Sperren/Entsperren.</li><li>Dateirechte &amp; Ownership im Zusammenspiel mit primärer und sekundären Gruppen.</li><li>PAM-Module (Pluggable Authentication Modules): Reihenfolge und Kontrollflags (required, requisite, sufficient, optional).</li></ul>
+<h4>Kommandoreferenz</h4>
+<pre><code># Benutzer anlegen (mit Home, Standardgruppe, Shell)
+sudo useradd -m -s /bin/bash -U alice
+sudo passwd alice
+
+# Benutzer ändern (Shell, Gruppen, Ablauf)
+sudo usermod -s /bin/zsh -aG wheel,audio alice
+sudo chage -E 2025-12-31 alice
+
+# Benutzer sperren/entsperren
+sudo usermod -L alice   # sperren
+sudo usermod -U alice   # entsperren
+
+# Benutzer löschen (+Home)
+sudo userdel -r alice
+
+# Gruppenverwaltung
+getent group developers
+sudo groupadd developers
+sudo gpasswd -a alice developers
+sudo gpasswd -d alice developers
+</code></pre>
+<h4>Praxis-Lab</h4><ol><li>Lege <code>proj</code>‑Gruppe an, füge 2 Nutzer hinzu.</li><li>Erstelle <code>/srv/proj</code> und setze <code>sgid</code>, damit neue Dateien Gruppen‑Ownership erben.</li><li>Erzwinge sichere Passwörter via <code>pam_pwquality.so</code> (minlen, ucredit/lcredit/dcredit).</li></ol>
+<h4>Häufige Fehler</h4><ul><li><em>Permission denied</em> trotz Mitgliedschaft → neu einloggen (Gruppen gelten erst für neue Sessions).</li><li><em>nologin</em>-Shell gesetzt → interaktive Anmeldung scheitert.</li><li>Home nicht erstellt: <code>useradd -m</code> vergessen.</li></ul>
+<h4>Prüfungstipps</h4><ul><li>Unterschied primäre vs. sekundäre Gruppe kennen.</li><li><code>chage</code>‑Felder: minimale/maximale Tage, Warnzeit, Inaktivität.</li><li><code>visudo</code> verwenden, niemals <code>/etc/sudoers</code> direkt editieren.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>useradd</code></td><td>-m  Home anlegen; -s Shell; -U Gruppe erstellen; -G Sekundärgruppen; -e Ablaufdatum (YYYY-MM-DD)</td></tr>
+<tr><td><code>usermod</code></td><td>-aG Gruppen anhängen; -L sperren; -U entsperren; -s Shell; -e Ablaufdatum; -c Kommentar</td></tr>
+<tr><td><code>userdel</code></td><td>-r Home &amp; Mailspool löschen; (Achtung: Dateien auf anderen Mounts bleiben!)</td></tr>
+<tr><td><code>chage</code></td><td>-l anzeigen; -E Ablaufdatum; -m minimal; -M maximal; -W Warnzeit; -I Inaktivität</td></tr>
+<tr><td><code>passwd</code></td><td>-l sperren; -u entsperren; -e sofort ablaufen lassen; -n minimal; -x maximal; -w Warnzeit</td></tr>
+<tr><td><code>gpasswd</code></td><td>-a hinzufügen; -d entfernen; -A Admins; -M Mitglieder setzen</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Projektordner /srv/proj mit sgid: neue Dateien erben Gruppen‑Ownership.</li>
+<li>Service-Account ohne Login: Shell /usr/sbin/nologin und keine Home-Erstellung.</li>
+<li>Passwortpolitik mit pam_pwquality: Mindestlänge &amp; Zeichencocktail erzwingen.</li>
+<li>Temporäre Adminrechte via sudoers Drop-In in /etc/sudoers.d/NAME.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Existiert der Nutzer/Gruppe? (getent passwd/group)</li>
+<li>Richtige Shell/Home gesetzt? (useradd/usermod -s/-m)</li>
+<li>Passwort/Lock‑Status ok? (passwd -S, chage -l)</li>
+<li>Gruppenmitgliedschaften aktiv? (id; neue Session nötig)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Projektordner /srv/proj mit sgid: neue Dateien erben Gruppen‑Ownership. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Service-Account ohne Login: Shell /usr/sbin/nologin und keine Home-Erstellung. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Passwortpolitik mit pam_pwquality: Mindestlänge &amp; Zeichencocktail erzwingen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Temporäre Adminrechte via sudoers Drop-In in /etc/sudoers.d/NAME. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nutzer &amp; Gruppen
+sudo useradd -m -s /bin/bash -U alice
+sudo passwd alice
+sudo usermod -aG wheel,audio alice
+sudo chage -E 2025-12-31 alice
+sudo usermod -L alice   # sperren
+sudo userdel -r alice
+getent passwd alice; getent group wheel</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="pam-grundlagen.html" rel="prev">← Vorherige Seite</a> · <a href="sudoers-und-visudo.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dateisystem‑Typen</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Dateisystem‑Typen" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Typen</div>
+<h2>Dateisystem‑Typen</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a class="active" href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>Wesentliche Eigenschaften von ext4, XFS, Btrfs im Detail erklären und geeignete Einsatzszenarien auswählen.</li>
+<li>Kompatibilitätsaspekte (FAT, exFAT, NTFS) im Linux‑Kontext einordnen.</li>
+<li>Dateisysteme erstellen, prüfen, einhängen und optimieren (mkfs, fsck, tune2fs/xfs_admin/btrfs).</li>
+<li>Snapshots, Subvolumes, Quotas und Mount‑Optionen zielgerichtet einsetzen.</li>
+</ul></div></div>
+<div class="card block"><h3>Kurzüberblick</h3><div class="card-body">
+<table>
+<tr><th>Typ</th><th>Stärken</th><th>Wann einsetzen</th><th>Hinweise</th></tr>
+<tr><td>ext4</td><td>Sehr stabil, breite Tool‑Unterstützung</td><td>Allround, VMs, Desktops, kleine bis mittlere Server</td><td>Journaling, Delayed Allocation, maturing seit Jahren</td></tr>
+<tr><td>XFS</td><td>Hohe Performance bei großen Dateien/Parallelität</td><td>Medien, Backups, Datenbanken (große Files), NVMe/RAID</td><td>Online‑Defrag, sehr gute Skalierung; weniger gut bei vielen Mini‑Files</td></tr>
+<tr><td>Btrfs</td><td>Snapshots, Subvolumes, COW, Checksums</td><td>Workstations, Container‑Hosts, Rollback‑Szenarien</td><td>Feature‑reich, erfordert Verständnis (COW‑Tuning, RAID‑Profile)</td></tr>
+<tr><td>FAT/exFAT</td><td>Breite OS‑Kompatibilität</td><td>Wechseldatenträger, Kameras, Austausch mit Windows/macOS</td><td>Keine POSIX‑Rechte, kaum Features</td></tr>
+<tr><td>NTFS</td><td>Kompat. zu Windows</td><td>Dual‑Boot, Austausch</td><td>Unter Linux via ntfs‑3g; Performance/Feature‑Gap zu nativem ext4/xfs</td></tr>
+<tr><td>ZFS</td><td>End‑to‑End Checksums, Snapshots, RAID‑Z, Send/Receive</td><td>Storage‑Server, Backups, Daten‑Integrität im Fokus</td><td>Nicht im Kernel enthalten (Lizenz), DKMS/Out‑of‑Tree; RAM‑hungrig</td></tr>
+</table>
+</div></div>
+<div class="card block"><h3>Theorie &amp; Konzepte</h3><div class="card-body">
+<h4>Journaling &amp; Konsistenz</h4>
+<p>Moderne FS nutzen Journaling (z. B. ext4, XFS), um Metadaten‑Konsistenz nach Abstürzen sicherzustellen. <em>Ordered</em> vs. <em>Writeback</em> vs. <em>Data=journal</em> beeinflusst Sicherheits‑/Performance‑Tradeoffs.</p>
+<h4>Copy‑on‑Write (COW)</h4>
+<p>Btrfs schreibt Änderungen in neue Blöcke, ermöglicht schnelle Snapshots/Clones und Prüfsummen für Daten/Metadaten. Nachteil: Random‑Write‑Workloads können fragmentieren; Workarounds z. B. <code>nodatacow</code> für VM‑Images.</p>
+<h4>Inodes, Blockgrößen, Allokationsstrategien</h4>
+<p>ext4 nutzt Extents/Delayed Allocation; XFS hat Variable Extents und starke Parallelisierung; Btrfs arbeitet mit B‑Trees für nahezu alles (Subvolumes, Snapshots, Quotas).</p>
+</div></div>
+<div class="card block"><h3>Praxis: Anlegen, Prüfen, Einhängen</h3><div class="card-body"><pre><code>
+ # ext4 anlegen und prüfen
+ sudo mkfs.ext4 -L data /dev/sdb1
+ sudo tune2fs -l /dev/sdb1 | grep "Filesystem features"
+ sudo e2fsck -f /dev/sdb1
+
+ # XFS anlegen und prüfen
+ sudo mkfs.xfs -L media /dev/sdc1
+ sudo xfs_info /mnt
+ sudo xfs_repair -n /dev/sdc1   # Read‑only Check
+
+ # Btrfs anlegen (mit Label) und Subvolume nutzen
+ sudo mkfs.btrfs -L bdata /dev/sdd1
+ sudo mount /dev/sdd1 /mnt
+ sudo btrfs subvolume create /mnt/@root
+ sudo umount /mnt &amp;&amp; sudo mount -o subvol=@root /dev/sdd1 /mnt
+
+ # Mount in /etc/fstab (Beispiele)
+ UUID=...  /data  ext4  defaults,noatime,commit=60  0 2
+ UUID=...  /media xfs   defaults,inode64,discard    0 0
+ UUID=...  /       btrfs subvol=@root,compress=zstd 0 0
+ </code></pre></div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>ext4</strong>: solide Default‑Wahl. Für viele kleine Dateien ggf. <code>dir_index</code> aktiv, <code>noatime</code> Mount, regelmäßige <code>fsck</code> Checks.</li>
+<li><strong>XFS</strong>: ideal für große Dateien/hohen Durchsatz. Auf genügend RAM und aktuelle Tools achten; Online‑Defrag bei Fragmentierung verwenden.</li>
+<li><strong>Btrfs</strong>: Snapshots für Rollbacks, <code>compress=zstd</code> für Platz/Performance. Für VM‑Images <code>nodatacow</code> oder separater Subvolume‑Pfad.</li>
+<li><strong>Wechselmedien</strong>: exFAT für breite Kompatibilität; Sicherheits‑/Rechtebedarf vorher klären.</li>
+</ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>
+ # Übersicht unterstützen
+ lsblk -f           # Typ, Label, UUID
+ blkid              # UUID/Labels anzeigen
+
+ # Erstellung
+ mkfs.ext4 /dev/XYZ
+ mkfs.xfs  /dev/XYZ
+ mkfs.btrfs /dev/XYZ
+
+ # Infos &amp; Tuning
+ dumpe2fs -h /dev/XYZ
+ xfs_info /mountpoint
+ btrfs filesystem df /mountpoint
+
+ # Snapshots (Btrfs)
+ btrfs subvolume snapshot /mnt/@root /mnt/@root-snap
+
+ # Quotas
+ xfs_quota -x -c "report" /mountpoint
+ btrfs qgroup show /mountpoint
+ </code></pre></div></div>
+<div class="card block"><h3>Tuning: ext4, XFS, Btrfs</h3><div class="card-body">
+<h4>ext4</h4>
+<ul>
+<li><code>noatime</code>/<code>relatime</code>: reduziert Metadaten‑Writes.</li>
+<li><code>commit=60</code>: Journal‑Commit alle 60s – höherer Durchsatz, etwas mehr Risiko.</li>
+<li><code>data=ordered</code> (Default) statt <code>writeback</code> für sicherere Konsistenz.</li>
+<li><code>dir_index</code> für schnellere Verzeichnisauflistung.</li>
+<li>Auf neuen FS: <code>metadata_csum</code>, <code>64bit</code> Features via <code>tune2fs</code>.</li>
+</ul>
+<pre><code>UUID=... /data ext4 defaults,noatime,commit=60 0 2
+mount | grep " /data "
+            </code></pre>
+<h4>XFS</h4>
+<ul>
+<li><code>inode64</code> für große Dateisysteme.</li>
+<li><code>allocsize=</code> für Streaming/Backup‑Workloads testen.</li>
+<li>SSD: periodisches <code>fstrim</code> statt dauerhaftem <code>discard</code>.</li>
+<li>Online‑Defrag: <code>xfs_fsr</code>/<code>xfs_spaceman</code>.</li>
+</ul>
+<pre><code>UUID=... /media xfs defaults,inode64 0 0
+xfs_info /media
+            </code></pre>
+<h4>Btrfs</h4>
+<ul>
+<li><code>compress=zstd</code> häufig sinnvoll (Platz/IO sparen).</li>
+<li>Subvolumes für Trennung (<code>@root</code>, <code>@home/@data</code>).</li>
+<li>Für VM‑Images/DB: <code>nodatacow</code> bzw. <code>chattr +C</code> nutzen.</li>
+<li>Gezielte Balance (<code>btrfs balance start -dusage=...</code>), nicht blind.</li>
+</ul>
+<pre><code>UUID=... / btrfs subvol=@root,compress=zstd,ssd,space_cache=v2 0 0
+btrfs filesystem df /
+            </code></pre>
+</div></div>
+<div class="card block"><h3>RAID &amp; Layering</h3><div class="card-body">
+<p>Die Dateisystemwahl hängt stark von darunterliegenden Layern ab (MD‑RAID, LVM, HW‑RAID, LUKS, Thin‑Provisioning).</p>
+<ul>
+<li><strong>Write‑Hole &amp; Journaling:</strong> RAID5/6 mit COW‑FS (Btrfs) vs. MD‑RAID abwägen (Integrität vs. Performance).</li>
+<li><strong>Alignment:</strong> <em>stride/stripe‑width</em> (ext4) und <em>agcount</em> (XFS) passend wählen.</li>
+<li><strong>Snapshots:</strong> LVM‑Snapshots vs. Btrfs‑Snapshots – Use‑Case entscheidet.</li>
+</ul>
+<pre><code>mkfs.ext4 -E stride=128,stripe-width=512 /dev/md0
+tune2fs -l /dev/md0 | grep -i stripe
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Benchmarking</h3><div class="card-body"><pre><code>
+# dd (grobe Tendenz, Cache beachten)
+dd if=/dev/zero of=/data/test.img bs=1G count=2 oflag=direct
+#
+# fio: realistische Workloads
+fio --name=randread --filename=/data/testfile --size=2G \
+    --rw=randread --bs=4k --iodepth=32 --numjobs=4 --direct=1 --time_based --runtime=60
+#
+fio --name=seqwrite --filename=/data/testfile --size=10G \
+    --rw=write --bs=1M --iodepth=16 --numjobs=1 --direct=1 --runtime=60
+          </code></pre><p>Hinweise: identische Hardware, Caches/Freiberäume angleichen, gleiche Mount‑Optionen, mehrere Läufe mitteln.</p></div></div>
+<div class="card block"><h3>Typische Fallstricke</h3><div class="card-body"><ul>
+<li><strong>ext4 data=writeback:</strong> höheres Korruptionsrisiko nach Crash – nur wissentlich.</li>
+<li><strong>XFS + viele kleine Dateien:</strong> Metadaten‑Overhead; ggf. ext4 prüfen.</li>
+<li><strong>Btrfs Fragmentierung:</strong> Random‑Writes + COW → <code>autodefrag</code> testen; für große Images <code>nodatacow</code>.</li>
+<li><strong>TRIM/Discard:</strong> periodisches <code>fstrim.timer</code> bevorzugen.</li>
+<li><strong>Falsches Alignment:</strong> RAID/SSD‑Mismatch kostet stark.</li>
+</ul></div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz" id="quiz-fs-1">
+<div class="quiz-question">Welches Dateisystem ist typischerweise ideal für sehr große, sequentielle Dateien und hohe Parallelität?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="fs1" type="radio"/> ext4</label>
+<label class="quiz-option" data-correct="1"><input name="fs1" type="radio"/> XFS</label>
+<label class="quiz-option"><input name="fs1" type="radio"/> FAT</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+<div class="quiz" id="quiz-fs-2">
+<div class="quiz-question">Welche Aussage trifft für Btrfs im Standardbetrieb am ehesten zu?</div>
+<div class="quiz-options">
+<label class="quiz-option" data-correct="1"><input name="fs2" type="radio"/> COW, Snapshots und Kompression können Read‑Lasten verbessern.</label>
+<label class="quiz-option"><input name="fs2" type="radio"/> Keine Prüfsummen vorhanden.</label>
+<label class="quiz-option"><input name="fs2" type="radio"/> Btrfs unterstützt keine Quotas.</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Erstellen Sie eine XFS‑Partition und vergleichen Sie Kopierzeiten großer Dateien (≥5 GB) mit ext4. Dokumentieren Sie die Mount‑Optionen.</li>
+<li>Legen Sie auf Btrfs zwei Subvolumes an (<code>@root</code>, <code>@data</code>), aktivieren Sie <code>compress=zstd</code> und erstellen Sie einen Snapshot. Messen Sie Platzbedarf mit <code>btrfs filesystem du</code>.</li>
+<li>Welche Risiken hat <code>data=writeback</code> bei ext4? Reproduzieren Sie einen Stromausfall‑Test in einer VM (Vorsicht!).</li>
+</ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welches Dateisystem eignet sich typischerweise für Workloads mit sehr großen, sequentiellen Dateien? Begründen Sie.</li>
+<li>Nennen Sie zwei Vorteile von Btrfs gegenüber ext4 und ein Szenario, in dem ext4 die bessere Wahl ist.</li>
+<li>Welche Mount‑Option vermindert unnötige Schreibzugriffe bei häufigen Datei‑Reads? Welche Nebenwirkungen hat sie?</li>
+</ol></div></div>
+<div class="card block"><h3>Deep‑Dive: ext4</h3><div class="card-body">
+<p><strong>Struktur:</strong> extents‑basierte Allokation, HTree‑Indizes für Verzeichnisse, Journal (JBD2) für Metadaten, optional Datenjournal.</p>
+<ul>
+<li><strong>Journaling‑Modi:</strong> <code>data=ordered</code> (Default, Daten vor Metadaten), <code>writeback</code> (schneller, riskanter), <code>journal</code> (sicher, langsam).</li>
+<li><strong>Delayed Allocation:</strong> bessere Extent‑Zusammenhängigkeit, kann bei Crashes zu 0‑Byte‑Files führen (Daten nicht im Journal).</li>
+<li><strong>Feature‑Flags:</strong> <code>64bit</code>, <code>metadata_csum</code>, <code>dir_index</code>, <code>extent</code> – mit <code>tune2fs -l</code> prüfen.</li>
+</ul>
+<pre><code># Diagnose
+sudo dumpe2fs -h /dev/sdb1 | sed -n '1,50p'
+# Verzeichnisindizes aktivieren
+sudo tune2fs -O dir_index /dev/sdb1 &amp;&amp; sudo e2fsck -Df /dev/sdb1
+# Journal‑Commit Intervall anpassen (über Mount)
+sudo mount -o remount,commit=60,noatime /data
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Deep‑Dive: XFS</h3><div class="card-body">
+<p><strong>Design:</strong> Allocation Groups (AGs) für Parallelität, B+‑Trees für freie Extents, Journal (Log) in separaten Regionen.</p>
+<ul>
+<li><strong>Stärken:</strong> sehr gute Skalierung bei großen Dateien, parallele IO, Online‑Defragmentierung.</li>
+<li><strong>Hinweise:</strong> weniger effizient bei Millionen sehr kleiner Dateien; RAM‑bedarf für Metadaten‑Caches beachten.</li>
+<li><strong>Trim:</strong> bevorzugt periodisch via <code>fstrim.timer</code> statt dauerhaftem <code>discard</code>.</li>
+</ul>
+<pre><code># Layout/Infos
+sudo xfs_info /media
+# Freiraum/Fragmentierung analysieren
+sudo xfs_spaceman -c 'frag -v' /media
+# Online‑Defrag (Datei/Verzeichnis)
+sudo xfs_fsr -v /media/schwere_datei
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Deep‑Dive: Btrfs</h3><div class="card-body">
+<p><strong>COW‑basierte Architektur:</strong> nahezu alle Strukturen als B‑Trees; Subvolumes als eigenständige Wurzeln; eingebaute Checksums für Daten/Metadaten.</p>
+<ul>
+<li><strong>Snapshots/Send:</strong> schnelle, platzsparende Snapshots; Replikation via <code>btrfs send/receive</code>.</li>
+<li><strong>RAID‑Profile:</strong> <code>single</code>, <code>dup</code> (nur Metadaten), <code>raid1/10/5/6</code> – 5/6 erfordern aktuelles Kernel/Tools und Verständnis von Write‑Hole/Paritäts‑Rebuilds.</li>
+<li><strong>Fragmentierung:</strong> Random‑Writes + COW → <code>autodefrag</code> testen; für VM/DB <code>nodatacow</code> (per Subvolume/Attribute <code>chattr +C</code>).</li>
+</ul>
+<pre><code># Subvolumes und Snapshots
+sudo btrfs subvolume create /mnt/@home
+sudo btrfs subvolume snapshot -r /mnt/@root /mnt/@root-$(date +%F)
+# Balance gezielt (nicht blind)
+sudo btrfs balance start -dusage=75 -musage=75 /mnt
+# Scrub (Integritätsprüfung)
+sudo btrfs scrub start -B /mnt
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Migration &amp; Konvertierung</h3><div class="card-body">
+<ul>
+<li><strong>ext4 → XFS/Btrfs:</strong> klassisch per rsync/restore. Beispiel: Live‑System von <code>/</code> auf neues FS migrieren mittels Rescue‑Medium.</li>
+<li><strong>Btrfs Subvol‑Layout:</strong> <code>@root</code>, <code>@home</code>, <code>@log</code>, <code>@containers</code>; getrennte Mount‑Optionen pro Subvolume.</li>
+<li><strong>UUID/Labels:</strong> nach Migration <code>/etc/fstab</code> aktualisieren; <code>lsblk -f</code> und <code>blkid</code> prüfen.</li>
+</ul>
+<pre><code># Rsync‑Migrationsmuster
+sudo rsync -aAXHv --numeric-ids --exclude={'/dev/*','/proc/*','/sys/*','/tmp/*','/run/*','/mnt/*','/media/*','/lost+found'} / /mnt/@root/
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Monitoring &amp; Health</h3><div class="card-body">
+<ul>
+<li><strong>SMART/PHY:</strong> <code>smartctl -a /dev/sdX</code>, Temperaturen/Fehlerzähler prüfen.</li>
+<li><strong>ext4:</strong> regelmäßige <code>e2fsck</code> (offline) je nach Einsatz; <code>tune2fs -l</code> für Mount‑Counts/Intervalle.</li>
+<li><strong>XFS:</strong> <code>xfs_repair -n</code> (Read‑only Check) vor Offline‑Repair.</li>
+<li><strong>Btrfs:</strong> <code>btrfs scrub</code> zyklisch, <code>btrfs device stats</code>, <code>btrfs check</code> nur offline und mit Vorsicht.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body">
+<ul>
+<li><strong>ext4 orphan inodes:</strong> nach Crash normal; <code>e2fsck -f</code> repariert. Prüfen, ob <code>writeback</code> aktiv war.</li>
+<li><strong>XFS Metadata‑Corruption:</strong> Logs sichern; erst <code>xfs_repair -n</code>, dann ohne <code>-n</code> im Maintenance‑Fenster.</li>
+<li><strong>Btrfs ENOSPC trotz Freiraum:</strong> Metadaten erschöpft; gezielte Balance (<code>-musage</code>), Snapshots aufräumen, <code>btrfs filesystem df</code> prüfen.</li>
+<li><strong>Mount hängt langsam:</strong> Netzwerk‑/uDisks‑Timeouts, defekte Geräte, fehlerhafte <code>/etc/fstab</code> Optionen (<code>nofail</code>, <code>x-systemd.device-timeout=</code> erwägen).</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Sicherheit &amp; Integrität</h3><div class="card-body">
+<ul>
+<li><strong>Checksums:</strong> Btrfs/ZFS erkennen stille Bitfehler, ext4/XFS nicht – erwäge RAID, ECC‑RAM, zeitnahe Backups.</li>
+<li><strong>Verschlüsselung:</strong> LUKS unterhalb des FS; Interaktion mit COW (Btrfs) und TRIM (<code>discard, fstrim</code>) verstehen.</li>
+<li><strong>Forensik:</strong> Journale können Artefakte enthalten; Read‑only Mounts (<code>-o ro,noload</code> bei ext4/XFS) für Analysen.</li>
+</ul>
+<pre><code># Read‑only ohne Journal‑Replays
+sudo mount -t ext4 -o ro,noload /dev/sdb1 /mnt
+sudo mount -t xfs  -o ro,norecovery /dev/sdc1 /mnt
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Praxis‑Szenarien</h3><div class="card-body">
+<ul>
+<li><strong>Medienserver (NVMe + HDD‑Tiering):</strong> XFS auf NVMe für Transcode/Cache, ext4/XFS auf HDD für Archiv; wöchentliches <code>fstrim</code>.</li>
+<li><strong>Dev‑Workstation:</strong> Btrfs mit <code>@root/@home</code>, Snapshots vor System‑Upgrades, <code>compress=zstd</code>.</li>
+<li><strong>Backup‑Repository:</strong> XFS oder ZFS; immutables durch Snapshots/Send‑Receive; Offsite‑Replikation.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Glossar</h3><div class="card-body">
+<dl>
+<dt>Extent</dt><dd>Zusammenhängender Blockbereich, reduziert Fragmentierung/Metadaten.</dd>
+<dt>COW</dt><dd>Copy‑on‑Write: Änderungen werden in neue Blöcke geschrieben, alte bleiben bis Commit unverändert.</dd>
+<dt>Scrub</dt><dd>Integritätsprüfung mit Reparaturversuch aus Redundanz.</dd>
+</dl>
+</div></div>
+<div class="card block"><h3>Weiterführende Links</h3><div class="card-body">
+<ul>
+<li>Kernel Docs: ext4, XFS, Btrfs (docs.kernel.org)</li>
+<li>Btrfs Wiki (btrfs.wiki.kernel.org)</li>
+<li>XFS Documentation (xfs.org, man‑Pages)</li>
+</ul>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="dateisystem-attribute.html" rel="prev">← Vorherige Seite</a> · <a href="dateisystem-werkzeuge.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

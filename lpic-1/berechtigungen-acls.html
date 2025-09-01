@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Berechtigungen &amp; ACLs – LPIC‑1</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Berechtigungen &amp; ACLs – LPIC‑1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a class="active" href="./index.html">LPIC-1</a>
+<a class="disabled" href="#">LPIC-2</a>
+<a class="disabled" href="#">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="./index.html">LPIC‑1</a> ▸ Berechtigungen &amp; ACLs</div>
+<h2>Berechtigungen &amp; ACLs</h2>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px">
+<h3>LPIC‑1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a class="active" href="berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="paketverwaltung.html">Paketverwaltung</a>
+<a href="prozesse.html">Prozesse &amp; Systemd</a>
+<a href="benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="shells-scripting.html">Shells &amp; Scripting</a>
+<a href="archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</div>
+<div class="card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="berechtigungen-acls/rechte-grundlagen.html">Rechte‑Grundlagen</a>
+<a href="berechtigungen-acls/chmod-chown-chgrp.html">chmod, chown, chgrp</a>
+<a href="berechtigungen-acls/umask-und-defaults.html">umask &amp; Defaults</a>
+<a href="berechtigungen-acls/special-bits-suid-sgid-sticky.html">Special Bits (suid/sgid/sticky)</a>
+<a href="berechtigungen-acls/acl-grundlagen.html">ACL‑Grundlagen</a>
+<a href="berechtigungen-acls/acl-werkzeuge-getfacl-setfacl.html">ACL‑Werkzeuge</a>
+<a href="berechtigungen-acls/zugriffsstrategien-und-best-practices.html">Best Practices</a>
+</nav>
+</div>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>Unix‑Rechte rwx und Umask.</li><li>Setuid, setgid, Sticky Bit.</li><li>ACLs mit getfacl/setfacl.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>ls -l, stat
+chmod u+rwx,g+rx,o-r
+umask 022
+chown user:group file
+getfacl file; setfacl -m u:alice:r file
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Setze ACL für Gruppe „dev“ mit Schreibrecht.</li><li>Erkläre den Effekt von <code>umask 027</code>.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Was bewirkt das Sticky Bit auf Verzeichnissen?</li><li>Worin unterscheiden sich Posix‑Rechte und ACLs?</li></ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>chmod</code></td><td>symbolisch u/g/o/a,+/-/=(rwxXst); oktal 0–7; --reference=DATEI</td></tr>
+<tr><td><code>chown</code></td><td>USER[:GRUPPE] DATEI; -R rekursiv; --from prüfen</td></tr>
+<tr><td><code>chgrp</code></td><td>GRUPPE DATEI; -R rekursiv</td></tr>
+<tr><td><code>setfacl</code></td><td>-m u:NAME:rwX g:GRUPPE:r--; -x Eintrag löschen; -b alle ACLs löschen; -d Default-ACL</td></tr>
+<tr><td><code>getfacl</code></td><td>Effektive Rechte &amp; Mask anzeigen</td></tr>
+<tr><td><code>umask</code></td><td>Basis 666/777; mask subtrahiert Bits; häufig 022 oder 027</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX).</li>
+<li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen.</li>
+<li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD).</li>
+<li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Ownership korrekt? (ls -l)</li>
+<li>U/G/O‑Rechte passend? (chmod)</li>
+<li>ACLs vorhanden &amp; Mask? (getfacl)</li>
+<li>Sonderbits sinnvoll? (suid/sgid/sticky)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Rechte &amp; ACLs
+umask 027
+chmod u=rw,g=r,o= datei
+chown alice:proj datei
+chmod g+s /srv/proj    # sgid
+chmod o+t /shared      # sticky
+setfacl -m u:alice:rw- -m g:proj:rwX ordner
+getfacl ordner</code></pre></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

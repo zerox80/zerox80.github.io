@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Paketverwaltung – LPIC‑1</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Paketverwaltung – LPIC‑1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a class="active" href="./index.html">LPIC-1</a>
+<a class="disabled" href="#">LPIC-2</a>
+<a class="disabled" href="#">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="./index.html">LPIC‑1</a> ▸ Paketverwaltung</div>
+<h2>Paketverwaltung</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>LPIC‑1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a class="active" href="paketverwaltung.html">Paketverwaltung</a>
+<a href="prozesse.html">Prozesse &amp; Systemd</a>
+<a href="benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="shells-scripting.html">Shells &amp; Scripting</a>
+<a href="archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</aside>
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="paketverwaltung/debian-apt-dpkg.html">Debian: APT &amp; dpkg</a>
+<a href="paketverwaltung/rpm-yum-dnf.html">RPM: yum/dnf &amp; rpm</a>
+<a href="paketverwaltung/repositories-und-signaturen.html">Repos &amp; Signaturen</a>
+<a href="paketverwaltung/paketsuche-und-info.html">Paketsuche &amp; Info</a>
+<a href="paketverwaltung/updates-und-rollbacks.html">Updates &amp; Rollbacks</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Lernziele</h3>
+<div class="card-body">
+<ul>
+<li>Unterschiede zwischen Paketformaten und Toolchains (deb/dpkg/apt vs. rpm/dnf/yum) erklären.</li>
+<li>Repositories einrichten, vertrauen (GPG), priorisieren (Pinning/Priorities) und spiegeln.</li>
+<li>Paketabfragen: Abhängigkeiten, Dateiliste, Eigentümer („welches Paket liefert Datei X?“).</li>
+<li>Updates, Downgrades, Rollbacks und Paket-Locks/„Hold“ sicher durchführen.</li>
+<li>Fehlerdiagnose: kaputte Abhängigkeiten, gesperrte Datenbanken, GPG‑Probleme, Netzwerk.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Überblick: Paketverwaltungskonzepte</h3>
+<div class="card-body">
+<ul>
+<li><strong>Paket</strong>: Archiv mit Dateien, Metadaten (Version, Maintainer), Skripten (Pre/Post‑Install).</li>
+<li><strong>Repository</strong>: Signierte Paketquelle mit Index/Metadaten (z. B. <code>Packages</code>, <code>repodata</code>).</li>
+<li><strong>Auflösungs-Engine</strong>: Berechnet Abhängigkeiten/Konflikte (APT/DNF).</li>
+<li><strong>Transaktion</strong>: Satz aus Install/Remove/Upgrade‑Aktionen mit Rückfall/History.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Debian/Ubuntu: APT &amp; dpkg</h3>
+<div class="card-body">
+<pre><code># Index aktualisieren + System aktualisieren
+sudo apt update
+sudo apt upgrade              # normale Aktualisierung
+sudo apt full-upgrade         # darf Abhängigkeiten entfernen/ersetzen
+
+# Paket installieren/entfernen
+sudo apt install &lt;pkg&gt;
+sudo apt install &lt;pkg&gt;=&lt;version&gt;    # bestimmte Version
+sudo apt remove &lt;pkg&gt;
+sudo apt purge &lt;pkg&gt;                # inkl. Konfigdateien
+
+# Informationen &amp; Suche
+apt search &lt;term&gt;
+apt show &lt;pkg&gt;
+apt-cache policy &lt;pkg&gt;              # Versionen/Pin‑Priorität
+apt depends &lt;pkg&gt;                   # direkte Abhängigkeiten
+apt rdepends &lt;pkg&gt;                  # Reverse‑Dependencies
+
+# Datei‑Zugehörigkeit (welches Paket liefert diese Datei?)
+sudo apt install apt-file
+apt-file update
+apt-file search /usr/bin/curl
+
+# Lokale .deb Dateien mit dpkg, Abhängigkeiten mit APT lösen
+sudo dpkg -i file.deb
+sudo apt -f install                 # fehlende Abhängigkeiten nachziehen
+
+# Paketdateiliste
+dpkg -L &lt;pkg&gt;                       # installierte Dateien
+dpkg -S &lt;pfad/Datei&gt;                # welches installierte Paket besitzt die Datei?
+
+# Repos &amp; GPG
+sudoedit /etc/apt/sources.list
+sudo ls /etc/apt/sources.list.d/
+sudo apt-key list                   # veraltet; modern: /etc/apt/trusted.gpg.d/*.gpg
+
+# Pinning (Prioritäten)
+# /etc/apt/preferences.d/priority
+Package: &lt;pkg&gt;
+Pin: version 1.2.*
+Pin-Priority: 1001                  # erzwingt Downgrade/halten dieser Serie
+
+# Version sperren / halten
+sudo apt-mark hold &lt;pkg&gt;
+sudo apt-mark unhold &lt;pkg&gt;
+
+# Aufräumen
+sudo apt autoremove
+sudo apt clean
+</code></pre>
+<p>
+<strong>Hinweis:</strong> <code>apt</code> ist ein komfortabler Frontend‑Befehl. Für Skripte sind
+                <code>apt-get</code>/<code>apt-cache</code> stabiler. <code>dpkg</code> arbeitet nur auf dem lokalen Datenbank‑/Dateisystem‑Level.
+              </p>
+</div>
+</div>
+<div class="card block">
+<h3>RHEL/Fedora: DNF/YUM &amp; rpm</h3>
+<div class="card-body">
+<pre><code># Installation/Info
+sudo dnf install &lt;pkg&gt;
+sudo dnf remove &lt;pkg&gt;
+dnf info &lt;pkg&gt;
+
+dnf search &lt;term&gt;
+dnf provides /usr/bin/curl        # Datei→Paket Auflösung
+
+# Paketabfragen mit rpm
+rpm -q &lt;pkg&gt;                      # ist installiert?
+rpm -qi &lt;pkg&gt;                     # Metadaten
+rpm -ql &lt;pkg&gt;                     # Dateiliste
+rpm -qf &lt;pfad/Datei&gt;              # Datei gehört zu welchem installierten Paket?
+
+# Lokale .rpm prüfen/installieren
+rpm -K file.rpm                   # Signaturprüfung
+sudo dnf install ./file.rpm       # löst Abhängigkeiten
+
+# Repos &amp; GPG
+sudo dnf repolist
+sudo dnf config-manager --add-repo https://example/repo.repo
+sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-example
+
+dnf check-update                 # Updates prüfen
+sudo dnf upgrade --refresh
+
+# Historie/Rollback
+sudo dnf history
+sudo dnf history info &lt;ID&gt;
+sudo dnf history undo &lt;ID&gt;       # Transaktion rückgängig machen
+
+# Module/Streams (Fedora/RHEL)
+dnf module list
+sudo dnf module enable nodejs:18
+</code></pre>
+<p>
+<strong>Hinweis:</strong> <code>dnf</code> hat eine Transaktionshistorie mit Undo/Redo. <code>rpm</code> ist das Low‑Level‑Werkzeug.
+              </p>
+</div>
+</div>
+<div class="card block">
+<h3>Repositories &amp; Signaturen</h3>
+<div class="card-body">
+<ul>
+<li><strong>Signaturprüfung:</strong> Pakete/Metadaten sind GPG‑signiert. Importiere nur vertrauenswürdige Schlüssel.</li>
+<li><strong>Debian/Ubuntu:</strong> <code>/etc/apt/sources.list</code>, <code>/etc/apt/sources.list.d/</code>, Schlüssel unter <code>/etc/apt/trusted.gpg.d/</code>.</li>
+<li><strong>RHEL/Fedora:</strong> <code>/etc/yum.repos.d/*.repo</code>, GPG‑Keys in <code>/etc/pki/rpm-gpg/</code>.</li>
+<li><strong>Mirrors/Caching:</strong> apt‑cacher‑ng, lokale Spiegel (Bandwidth sparen, reproduzierbare Builds).</li>
+<li><strong>Prioritäten:</strong> APT‑Pinning, DNF‑Priorities‑Plugin (falls verfügbar) zur Steuerung der Bezugsquelle.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Paketsuche &amp; Informationen</h3>
+<div class="card-body">
+<pre><code># Debian/Ubuntu
+apt search &lt;term&gt;
+apt show &lt;pkg&gt;
+apt-cache policy &lt;pkg&gt;
+apt depends &lt;pkg&gt;
+apt rdepends &lt;pkg&gt;
+apt-file search &lt;pfad&gt;
+
+# RHEL/Fedora
+dnf search &lt;term&gt;
+dnf info &lt;pkg&gt;
+dnf repoquery --whatrequires &lt;pkg&gt;
+dnf provides &lt;pfad&gt;
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Updates, Downgrades &amp; Rollbacks</h3>
+<div class="card-body">
+<ul>
+<li><strong>APT:</strong> gezielte Version über <code>apt install pkg=version</code>. Downgrade via Pinning/Policy.</li>
+<li><strong>Hold/Sperren:</strong> <code>apt-mark hold pkg</code> bzw. DNF: <code>exclude=pkg*</code> im Repo/CLI.</li>
+<li><strong>DNF‑History:</strong> <code>dnf history undo &lt;ID&gt;</code> für Transaktions‑Rollback.</li>
+<li><strong>Sicherheit:</strong> Vor Kernel/CRIT‑Upgrades: Snapshots (LVM/Btrfs/ZFS) oder VM‑Snapshots.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Troubleshooting</h3>
+<div class="card-body">
+<ul>
+<li><strong>Lock/DB‑Fehler (APT):</strong> <code>sudo fuser -v /var/lib/dpkg/lock</code>, <code>sudo dpkg --configure -a</code>, <code>sudo apt -f install</code>.</li>
+<li><strong>GPG‑Fehler:</strong> Uhrzeit/NTP prüfen, richtigen Key importieren, zwischengespeicherte Metadaten erneuern (<code>apt update</code>, <code>dnf clean metadata</code>).</li>
+<li><strong>Abhängigkeitskonflikte:</strong> Version pinnen, alternative Repos deaktivieren, modulare Streams angleichen.</li>
+<li><strong>Netzwerk/Proxy:</strong> Umgebungsvariablen <code>http_proxy</code>/<code>https_proxy</code> setzen, Repo‑Mirror wechseln.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Alternative Formate (Kurzüberblick)</h3>
+<div class="card-body">
+<ul>
+<li><strong>Snap</strong> (Ubuntu): self‑contained, Channels/Tracks, sandboxed.</li>
+<li><strong>Flatpak</strong>: Desktop‑Apps, Runtimes, Portals, Flathub.</li>
+<li><strong>AppImage</strong>: portable, keine Installation, Integrationshelfer.</li>
+<li>Für LPIC‑1 ist Fokus auf APT/DNF/RPM relevant; kennen reicht.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Best Practices</h3>
+<div class="card-body">
+<ul>
+<li><strong>Nur vertrauenswürdige Repos</strong> hinzufügen, Schlüssel prüfen.</li>
+<li><strong>Konfiguration versionieren</strong> (<code>/etc/apt/sources.list.d</code>, <code>/etc/yum.repos.d</code>).</li>
+<li><strong>Regelmäßig aufräumen</strong> (<code>apt autoremove</code>, <code>dnf autoremove</code>), verwaiste Pakete entfernen.</li>
+<li><strong>Produktive Systeme</strong>: Staging testen, Snapshots, geplante Wartungsfenster.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Cheatsheet</h3>
+<div class="card-body">
+<pre><code># Debian/Ubuntu (APT/dpkg)
+sudo apt update &amp;&amp; sudo apt upgrade
+sudo apt install &lt;pkg&gt;[=&lt;ver&gt;]
+apt show|search &lt;term|pkg&gt;
+apt-cache policy &lt;pkg&gt;
+apt-file search &lt;pfad&gt;
+dpkg -L &lt;pkg&gt; ; dpkg -S &lt;pfad&gt;
+sudo apt-mark hold &lt;pkg&gt;
+
+# RHEL/Fedora (DNF/rpm)
+sudo dnf upgrade --refresh
+sudo dnf install &lt;pkg&gt;
+dnf info|search &lt;pkg|term&gt;
+dnf provides &lt;pfad&gt; ; rpm -qf &lt;pfad&gt;
+sudo dnf history ; sudo dnf history undo &lt;ID&gt;
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen (Praxis)</h3>
+<div class="card-body">
+<ol>
+<li>Finde das Paket, das <code>/usr/bin/curl</code> bereitstellt (APT: <code>apt-file</code>, DNF: <code>dnf provides</code>).</li>
+<li>Installiere eine bestimmte Paketversion und verhindere Updates (<code>apt-mark hold</code> bzw. DNF‑Exclude).</li>
+<li>Simuliere ein Upgrade und prüfe, welche Pakete betroffen sind (<code>apt -s upgrade</code>, <code>dnf upgrade --assumeno</code>).</li>
+<li>Führe ein Update durch und mache es mit DNF‑History wieder rückgängig.</li>
+<li>Füge ein Test‑Repository hinzu und setze eine höhere/niedrigere Priorität (APT‑Pinning, DNF‑Priorities).</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen</h3>
+<div class="card-body">
+<ol>
+<li>Worin unterscheiden sich <code>dpkg</code> und <code>apt</code> bzgl. Aufgabenbereich?</li>
+<li>Wie prüfst du Paket‑ und Metadatensignaturen unter Debian und RHEL‑basierten Systemen?</li>
+<li>Welche Mechanismen gibt es zum Sperren bestimmter Paketversionen?</li>
+<li>Wie ermittelst du, welches Paket eine gegebene Datei liefert (Debian und RHEL)?</li>
+<li>Wie führst du ein Rollback einer Aktualisierung auf Fedora/RHEL durch?</li>
+</ol>
+</div>
+</div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dateisystem‑Werkzeuge</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Dateisystem‑Werkzeuge" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a> ▸ Werkzeuge</div>
+<h2>Dateisystem‑Werkzeuge</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="fhs.html">FHS Überblick</a>
+<a href="mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a class="active" href="dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="speicheranalyse.html">Speicheranalyse</a>
+<a href="inodes-und-links.html">Inodes &amp; Links</a>
+<a href="quotas.html">Quotas</a>
+<a href="partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>mkfs, fsck, tune2fs, xfs_*, btrfs‑Tools einsetzen.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet (Kurz)</h3><div class="card-body"><pre><code># Erstellen
+mkfs.ext4 /dev/sdb1
+mkfs.xfs  /dev/sdb2
+mkfs.btrfs /dev/sdb3
+
+# Prüfen/Reparieren (offline!)
+e2fsck -f /dev/sdb1
+xfs_repair /dev/sdb2
+btrfs check --readonly /dev/sdb3
+
+# Infos/Tuning
+tune2fs -l /dev/sdb1
+xfs_info /mnt
+btrfs filesystem df /mnt
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Erstelle und prüfe ein Test‑Dateisystem in einer Loop‑Datei.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Wann darfst du <code>fsck</code> sicher ausführen?</li></ol></div></div>
+<div class="card block"><h3>mkfs im Detail</h3><div class="card-body">
+<ul>
+<li><strong>ext4:</strong> <code>mkfs.ext4 -L data -m 0 -O metadata_csum,64bit /dev/sdb1</code> (Label, Reserve für root=0%, moderne Features).</li>
+<li><strong>XFS:</strong> <code>mkfs.xfs -L media -m crc=1 -i size=512 /dev/sdb2</code> (CRC‑Metadaten, größere Inodes für xattrs).</li>
+<li><strong>Btrfs:</strong> <code>mkfs.btrfs -L bdata -m dup -d single /dev/sdb3</code> (Metadaten‑Redundanz auf Single‑Disk).</li>
+</ul>
+<pre><code># Nach Erstellung: prüfen
+lsblk -f
+blkid
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Loopback‑Lab (sicher testen)</h3><div class="card-body"><pre><code># 1) Sparse‑Datei anlegen
+truncate -s 2G /tmp/disk.img
+
+# 2) Loop‑Device zuordnen
+LOOP=$(sudo losetup -fP --show /tmp/disk.img)
+echo $LOOP  # z. B. /dev/loop5
+
+# 3) Partitionstabelle + Partition (optional)
+sudo parted -s $LOOP mklabel gpt mkpart p1 ext4 1MiB 100%
+sudo partprobe $LOOP
+
+# 4) Dateisystem erstellen &amp; mounten
+sudo mkfs.ext4 ${LOOP}p1
+sudo mkdir -p /mnt/testfs &amp;&amp; sudo mount ${LOOP}p1 /mnt/testfs
+
+# 5) Arbeiten/Tests durchführen, dann aufräumen
+sudo umount /mnt/testfs
+sudo losetup -d $LOOP
+</code></pre></div></div>
+<div class="card block"><h3>fsck / Repair‑Tools</h3><div class="card-body">
+<ul>
+<li><strong>ext4:</strong> <code>e2fsck</code> (fsck.ext4). Nur unmounted nutzen; <code>-f</code> erzwingt Check; <code>-y</code> auto‑fix mit Vorsicht.</li>
+<li><strong>XFS:</strong> Kein <code>fsck.xfs</code> (Wrapper). Verwende <code>xfs_repair</code>; erst <code>-n</code> (Read‑only) zur Analyse, dann ohne <code>-n</code>.</li>
+<li><strong>Btrfs:</strong> <code>btrfs check</code> vorsichtig, standardmäßig <code>--readonly</code>; bevorzugt laufende Pflege mit <code>btrfs scrub</code>.</li>
+</ul>
+<pre><code># ext4 Zwangscheck konfigurieren
+sudo tune2fs -c 30 -i 6m /dev/sdb1   # alle 30 Mounts oder 6 Monate
+
+# XFS Read‑only Analyse
+sudo xfs_repair -n /dev/sdb2
+
+# Btrfs Scrub (on‑line)
+sudo btrfs scrub start -B /mnt
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Tuning &amp; Admin‑Tools</h3><div class="card-body">
+<ul>
+<li><strong>ext4:</strong> <code>tune2fs</code> (Features, Reserve, Checks), <code>dumpe2fs</code> (Metadaten), <code>debugfs</code> (Experten).</li>
+<li><strong>XFS:</strong> <code>xfs_admin</code> (Label/UUID), <code>xfs_growfs</code>, <code>xfs_spaceman</code>, <code>xfs_fsr</code> (Defrag).</li>
+<li><strong>Btrfs:</strong> <code>btrfs subvolume/create/snapshot/send/receive/balance/filesystem df/du/device stats</code>.</li>
+</ul>
+<pre><code># Labels/UUID
+sudo e2label /dev/sdb1 DATA
+sudo xfs_admin -L MEDIA /dev/sdb2
+sudo btrfs filesystem label /mnt MEDIA
+
+# Grow (online, wenn darunter LVM/Device größer)
+sudo resize2fs /dev/sdb1
+sudo xfs_growfs /mnt
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Imaging &amp; Wipe</h3><div class="card-body">
+<ul>
+<li><strong>Imaging:</strong> <code>dd</code>, <code>ddrescue</code>, <code>partclone</code> (FS‑aware), <code>fsarchiver</code>.</li>
+<li><strong>Wipe/Signaturen:</strong> <code>wipefs</code> zum Entfernen alter FS‑Signaturen; <code>blkdiscard</code> für SSD‑Trim.</li>
+</ul>
+<pre><code># Vorsicht: destruktiv!
+sudo wipefs -a /dev/sdb
+sudo dd if=/dev/zero of=/dev/sdb bs=1M status=progress  # nur wenn du sicher bist
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Fehlersuche</h3><div class="card-body">
+<ul>
+<li><strong>Gerätepfade ändern sich:</strong> immer <code>UUID/LABEL</code> in <code>fstab</code> nutzen.</li>
+<li><strong>Busy Mounts:</strong> <code>lsof +f -- /mnt</code>, <code>fuser -vm /mnt</code>, dann Prozesse beenden.</li>
+<li><strong>IO‑Fehler:</strong> dmesg/journal prüfen, SMART (<code>smartctl -a</code>), Kabel/Ports.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Anzeigen
+lsblk -f
+blkid
+findmnt -t ext4,xfs,btrfs
+
+# Kopieren/Sichern
+rsync -aAXH --numeric-ids SRC/ DST/
+
+# Btrfs
+btrfs subvolume list /mnt
+btrfs balance start -dusage=75 -musage=75 /mnt
+
+# XFS
+xfs_info /mnt
+xfs_spaceman -c 'frag -v' /mnt
+
+# ext4
+dumpe2fs -h /dev/sdb1 | head
+            </code></pre></div></div>
+<div class="card block"><h3>Weitere Übungen</h3><div class="card-body"><ol>
+<li>Lege drei Loop‑Devices an und erstelle ext4/XFS/Btrfs. Fülle sie mit Testdaten und vergleiche <code>fio</code>‑Muster.</li>
+<li>Simuliere Metadaten‑Fehler (nur im Lab) und analysiere die Ausgabe von <code>e2fsck</code>, <code>xfs_repair -n</code>, <code>btrfs check --readonly</code>.</li>
+<li>Wachse ein ext4 und ein XFS online, indem du ein LVM‑LV vergrößerst.</li>
+</ol></div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz">
+<div class="quiz-question">Welches Tool verwendest du für eine XFS‑Dateisystem‑Reparatur?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="q1" type="radio"/> fsck.xfs</label>
+<label class="quiz-option" data-correct="1"><input name="q1" type="radio"/> xfs_repair</label>
+<label class="quiz-option"><input name="q1" type="radio"/> btrfs check</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="dateisystem-typen.html" rel="prev">← Vorherige Seite</a> · <a href="fhs.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

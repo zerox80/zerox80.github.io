@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Mein Fortschritt</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Mein Fortschritt" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>ZeroX</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a href="../lpic-1/index.html">LPIC-1</a>
+<a href="../lpic-2/index.html">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="../lpic-1/index.html">LPIC‑1</a> ▸ Mein Fortschritt</div>
+<h2>Mein Fortschritt</h2><div class="card toc-auto"><div class="card-body"><h3>Inhaltsverzeichnis</h3><div class="toc"></div></div></div><p class="muted intro">In diesem Kapitel lernst du Mein Fortschritt Schritt für Schritt mit kurzen Beispielen. Am Ende kannst du typische Aufgaben sicher ausführen und dich auf Prüfungsfragen vorbereiten.</p>
+<div class="card"><div class="card-body">
+<p>Dein Fortschritt wird lokal im Browser gespeichert. Hier siehst du alle Kapitel, die du als erledigt markiert hast.</p>
+<div class="card" id="progressList"><div class="card-body">
+<ul id="doneList"></ul>
+</div></div>
+<script>
+(function(){
+  function fmt(path) {
+    try {
+      const parts = path.split('/').filter(Boolean);
+      return parts.slice(-1)[0].replace('.html','').replace(/[-_]/g,' ').replace(/\w/g, c=>c.toUpperCase());
+    } catch(e) { return path; }
+  }
+  function rebuild() {
+    const ul = document.getElementById('doneList');
+    ul.innerHTML = '';
+    Object.keys(localStorage).filter(k => k.startsWith('pageDone:') && localStorage.getItem(k)==='true')
+    .map(k => k.replace('pageDone:',''))
+    .sort()
+    .forEach(url => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = url;
+      a.textContent = fmt(url);
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+  }
+  window.addEventListener('progress-changed', rebuild);
+  rebuild();
+})();
+</script>
+</div></div>
+<div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div><div class="card"><div class="card-body"><h3>Backup &amp; Teilen</h3><p>Exportiere deinen Fortschritt als Datei und importiere ihn später wieder.</p><p><button class="btn" id="progExport">Exportieren</button> <input accept="application/json" id="progImport" style="display:none" type="file"/> <button class="btn" id="progImportBtn">Importieren</button></p></div></div>
+<script>
+(function(){
+  const prefix = 'pageDone:';
+  const keys = () => Object.keys(localStorage).filter(k => k.startsWith(prefix));
+  const exportBtn = document.getElementById('progExport');
+  const importBtn = document.getElementById('progImportBtn');
+  const fileIn = document.getElementById('progImport');
+  exportBtn.addEventListener('click', () => {
+    const data = {}; keys().forEach(k => data[k]=localStorage.getItem(k));
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'lpic1-progress.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+  importBtn.addEventListener('click', ()=> fileIn.click());
+  fileIn.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const text = await f.text();
+    let obj={}; try { obj = JSON.parse(text) } catch(e) { alert('Ungültige Datei'); return; }
+    Object.entries(obj).forEach(([k,v]) => localStorage.setItem(k,v));
+    alert('Fortschritt importiert!'); window.dispatchEvent(new Event('progress-changed')); location.reload();
+  });
+})();
+</script>
+</main>
+</body>
+</html>

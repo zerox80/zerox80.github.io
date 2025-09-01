@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>chmod, chown, chgrp</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="chmod, chown, chgrp" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a> ▸ chmod, chown, chgrp</div>
+<h2>chmod, chown, chgrp</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="rechte-grundlagen.html">Rechte‑Grundlagen</a>
+<a class="active" href="chmod-chown-chgrp.html">chmod, chown, chgrp</a>
+<a href="umask-und-defaults.html">umask &amp; Defaults</a>
+<a href="special-bits-suid-sgid-sticky.html">Special Bits (suid/sgid/sticky)</a>
+<a href="acl-grundlagen.html">ACL‑Grundlagen</a>
+<a href="acl-werkzeuge-getfacl-setfacl.html">ACL‑Werkzeuge</a>
+<a href="zugriffsstrategien-und-best-practices.html">Best Practices</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>chmod numerisch vs. symbolisch anwenden.</li><li>Besitz mit chown/chgrp ändern.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>chmod 640 file
+chmod u+x script.sh
+grep '^users:' /etc/group
+sudo chown alice:users file
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Setze Ausführungsrechte für Besitzer rekursiv im Verzeichnis.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Wann nutzt man chgrp statt chown?</li></ol></div></div>
+<div class="card block"><h3>Theorie</h3><div class="card-body">
+<ul>
+<li><strong>Numerisch:</strong> Oktalwerte je Klasse (u/g/o): r=4, w=2, x=1 → z. B. 640 = u:rw-, g:r--, o:---</li>
+<li><strong>Symbolisch:</strong> <code>chmod u+rx,g-w,o=</code> (setzen/entfernen/gleichsetzen)</li>
+<li><strong>Rekursiv:</strong> <code>-R</code> für Verzeichnisse, Vorsicht bei Überschreiben von Rechten.</li>
+<li><strong>Special Bits (Hinweis):</strong> suid/sgid/sticky auf eigener Seite; numerisch als führende Ziffer (4/2/1).</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis</h3><div class="card-body">
+<pre><code># Numerisch
+chmod 750 bin/
+chmod 2750 proj/           # sgid auf Verzeichnis (Gruppen-Ownership erben)
+
+# Symbolisch
+chmod u=rwX,g=rX,o= . -R   # X: nur auf Verzeichnissen oder wenn bereits x gesetzt
+chmod a+r /srv/data/*.txt
+
+# Besitzer/Gruppen
+sudo chown -R alice:dev /srv/devspace
+sudo chgrp dev /srv/devspace
+
+# Selektiv per find
+find /var/www -type f -name '*.sh' -exec chmod u+x {} +
+find /var/www -type d -exec chmod 755 {} +
+</code></pre>
+</div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Least Privilege:</strong> Nur notwendige Rechte setzen; <code>o=</code> häufig sinnvoll.</li>
+<li><strong>Verzeichnisse vs. Dateien:</strong> Für Verzeichnisse meist <code>755</code>/<code>750</code>, für Dateien <code>644</code>/<code>640</code>.</li>
+<li><strong>Gruppenbasiert arbeiten:</strong> Mit sgid‑Verzeichnissen und klaren Gruppen vermeiden Sie ACL‑Wildwuchs.</li>
+<li><strong>Audit:</strong> Änderungen dokumentieren; vor Massenänderungen Dry‑Run mit <code>find -print</code>.</li>
+</ul></div></div>
+<div class="card block"><h3>Erweitertes Cheatsheet</h3><div class="card-body"><pre><code># Rechte in ls
+ls -ld path      # d = Verzeichnis, - = Datei; rwx für u/g/o
+
+# Sticky/SGID numerisch
+chmod 1777 /tmp  # sticky
+chmod 2755 dir   # sgid
+
+# Symbolische Muster
+chmod u+X,g-w,o-rwx -R path
+</code></pre></div></div>
+<div class="card block"><h3>Weitere Übungen</h3><div class="card-body"><ol>
+<li>Setze in <code>/srv/team</code> rekursiv <code>u=rwX,g=rX,o=</code> und erkläre die Wirkung von <code>X</code>.</li>
+<li>Erzeuge ein Projektverzeichnis mit <code>sgid</code>, sodass neue Dateien die Gruppen-ID erben.</li>
+<li>Finde alle <code>.sh</code>-Dateien unter <code>/opt/app</code> und mache sie für den Besitzer ausführbar.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welche numerische Bedeutung hat <code>754</code> und wie setzt du sie symbolisch?</li>
+<li>Wie setzt du rekursiv nur für Verzeichnisse das Ausführungsbit?</li>
+<li>Wann ist <code>chgrp</code> notwendig, obwohl <code>chown</code> existiert?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Dateirechte, Sonderbits und ACLs.</p>
+<ul><li>Symbolische vs. oktale Modi (<code>u+rw,g-w,o=</code> vs. <code>640</code>).</li><li>Sonderbits: <code>suid</code> (u+s), <code>sgid</code> (g+s), <code>sticky</code> (o+t).</li><li>ACLs erlauben benutzerspezifische Rechte zusätzlich zu U/G/O.</li></ul>
+<pre><code># Standardrechte via umask (Beispiel: 022)
+umask 022
+
+# Klassische Rechte
+chmod 640 datei
+chmod u+rwx,g+rx,o-rwx script.sh
+chown alice:proj datei
+
+# Sonderbits
+chmod u+s /usr/local/bin/tool
+chmod g+s /srv/proj
+chmod o+t /tmp
+
+# ACLs
+setfacl -m u:alice:rw- -m g:proj:r-- datei
+getfacl datei
+
+# Default-ACLs für neue Dateien in Ordnern
+setfacl -d -m g:proj:rwX /srv/proj
+</code></pre>
+<h4>Fehlerbilder</h4><ul><li>ACL mask reduziert effektive Rechte → <code>getfacl</code> prüfen (mask).</li><li><code>chmod 777</code> als „Fix“ → in der Prüfung tabu; gezielt Rechte setzen.</li></ul>
+<h4>Prüfungstipps</h4><ul><li>Rechenweg: umask bestimmt <em>abgezogene</em> Bits (Basis 666/777).</li><li><code>X</code> in ACL (großes X) setzt x nur, wenn es ein Ordner ist oder x bereits irgendwo gesetzt war.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>chmod</code></td><td>symbolisch u/g/o/a,+/-/=(rwxXst); oktal 0–7; --reference=DATEI</td></tr>
+<tr><td><code>chown</code></td><td>USER[:GRUPPE] DATEI; -R rekursiv; --from prüfen</td></tr>
+<tr><td><code>chgrp</code></td><td>GRUPPE DATEI; -R rekursiv</td></tr>
+<tr><td><code>setfacl</code></td><td>-m u:NAME:rwX g:GRUPPE:r--; -x Eintrag löschen; -b alle ACLs löschen; -d Default-ACL</td></tr>
+<tr><td><code>getfacl</code></td><td>Effektive Rechte &amp; Mask anzeigen</td></tr>
+<tr><td><code>umask</code></td><td>Basis 666/777; mask subtrahiert Bits; häufig 022 oder 027</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX).</li>
+<li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen.</li>
+<li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD).</li>
+<li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Ownership korrekt? (ls -l)</li>
+<li>U/G/O‑Rechte passend? (chmod)</li>
+<li>ACLs vorhanden &amp; Mask? (getfacl)</li>
+<li>Sonderbits sinnvoll? (suid/sgid/sticky)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Rechte &amp; ACLs
+umask 027
+chmod u=rw,g=r,o= datei
+chown alice:proj datei
+chmod g+s /srv/proj    # sgid
+chmod o+t /shared      # sticky
+setfacl -m u:alice:rw- -m g:proj:rwX ordner
+getfacl ordner</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="acl-werkzeuge-getfacl-setfacl.html" rel="prev">← Vorherige Seite</a> · <a href="rechte-grundlagen.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

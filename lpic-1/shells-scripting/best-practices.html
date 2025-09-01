@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Best Practices – Shell-Scripting – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="Best Practices – Shell-Scripting – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../shells-scripting.html">Shells &amp; Scripting</a> · Best Practices</div>
+<h2>Best Practices</h2>
+<p class="muted">Richtlinien für robuste, wartbare und sichere Shell-Skripte.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px">
+<h3>LPIC-1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a class="active" href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</div>
+<div class="card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="bash-grundlagen.html">Bash-Grundlagen</a>
+<a href="variablen-und-umgebungsvariablen.html">Variablen &amp; Umgebungsvariablen</a>
+<a href="kontrollstrukturen.html">Kontrollstrukturen</a>
+<a href="funktionen-und-skripte.html">Funktionen &amp; Skripte</a>
+<a href="textverarbeitung-grep-sed-awk.html">Textverarbeitung: grep, sed, awk</a>
+<a href="regulare-ausdruecke.html">Reguläre Ausdrücke</a>
+<a href="jobsteuerung-und-prozesse.html">Jobsteuerung &amp; Prozesse</a>
+<a href="shebang-und-ausfuehrbarkeit.html">Shebang &amp; Ausführbarkeit</a>
+<a href="debugging-und-tracing.html">Debugging &amp; Tracing</a>
+<a class="active" href="best-practices.html">Best Practices</a>
+</nav>
+</div>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Grundregeln</h3>
+<div class="card-body">
+<ul>
+<li>Nutze <code>#!/usr/bin/env bash</code> und <code>set -Eeuo pipefail</code> am Anfang.</li>
+<li>Quote Variablen grundsätzlich: <code>"$var"</code>. Nutze Arrays statt <code>$*</code>.</li>
+<li>Behandle Fehler zentral (Trap auf <code>ERR</code>) und logge mit Zeitstempel.</li>
+<li>Trenne Logik in Funktionen (<code>main</code>, <code>parse_args</code>, <code>run</code>).</li>
+<li>Schreibe Hilfe/Usage und prüfe Eingaben strikt.</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Templates</h3>
+<div class="card-body">
+<pre><code>#!/usr/bin/env bash
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+trap 'rc=$?; echo "[ERR] ($rc) in Zeile $LINENO" &gt;&amp;2' ERR
+
+usage(){ cat &lt;&lt;USAGE
+Usage: $0 [-v] -i INPUT -o OUTPUT
+USAGE
+}
+
+parse_args(){ local OPTIND; while getopts ':vi:o:h' o; do case $o in
+  v) VERBOSE=1;; i) IN=$OPTARG;; o) OUT=$OPTARG;; h) usage; exit 0;; *) usage; exit 2;; esac; done }
+
+main(){ :; }
+main "$@"
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen</h3>
+<div class="card-body">
+<ol>
+<li>Baue ein Projektskelett (Ordner, Skripte, README) und lege ein Skript-Template an.</li>
+<li>Ergänze Loglevel (<code>INFO</code>/<code>WARN</code>/<code>ERROR</code>) mit farbiger Ausgabe.</li>
+<li>Füge <code>shellcheck</code> in eine CI-ähnliche Routine ein (lokal reicht).</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen</h3>
+<div class="card-body">
+<ol>
+<li>Warum ist <code>set -u</code> sinnvoll und wann stört es?</li>
+<li>Was macht <code>shopt -s nullglob</code>?</li>
+<li>Wie strukturierst du Optionen mit <code>getopts</code>?</li>
+</ol>
+</div>
+</div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Wichtige Praxisaspekte und Prüfungsbezug.</p>
+<ul><li>Relevante Manpages, typische Optionen und Nebeneffekte.</li><li>Praxisübung in einer frischen VM; Änderungen reproduzierbar dokumentieren.</li><li>Prüfungsszenarien mit Stolpersteinen und Zeitspar‑Tricks.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>bash</code></td><td>set -Eeuo pipefail; trap ERR; Funktionen, Arrays, getopts</td></tr>
+<tr><td><code>grep</code></td><td>-E regulär; -r rekursiv; -n Zeilen; -i Case-insensitiv; -v invert</td></tr>
+<tr><td><code>sed</code></td><td>-n p drucken; s/alt/neu/g ersetzen; -E erweiterte Regex; -i inline-edit</td></tr>
+<tr><td><code>awk</code></td><td>-F Feldtrenner; OFS Ausgabe; NR/NR==1 Kopf; $1..$NF Spalten</td></tr>
+<tr><td><code>xargs</code></td><td>-0 mit NUL; -n Anzahl; -P Parallelität</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Schnelle Datenbereinigung mit find -mtime +30 -delete (mit Trockentest).</li>
+<li>Log‑Analyse: journalctl -u dienst | grep -E 'ERROR|WARN'.</li>
+<li>CSV veredeln: awk -F, 'NR&gt;1{sum+=$3} END{print sum}' data.csv.</li>
+<li>Bash‑Script mit robustem Fehlerhandling &amp; set -Eeuo pipefail.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Bash‑Strict‑Mode aktiv? (set -Eeuo pipefail)</li>
+<li>Variablen richtig gequotet? ("$var")</li>
+<li>Pipelines geben Exit‑Codes korrekt weiter? (pipefail)</li>
+<li>Regex/FS korrekt gesetzt? (-E, -F, OFS)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Schnelle Datenbereinigung mit find -mtime +30 -delete (mit Trockentest). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Log‑Analyse: journalctl -u dienst | grep -E 'ERROR|WARN'. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>CSV veredeln: awk -F, 'NR&gt;1{sum+=$3} END{print sum}' data.csv. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Bash‑Script mit robustem Fehlerhandling &amp; set -Eeuo pipefail. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Bash Strict Mode &amp; Texttools
+set -Eeuo pipefail
+trap 'echo Fehler in Zeile $LINENO &gt;&amp;2' ERR
+grep -En '^(UID|GID)=' /etc/login.defs
+sed -n '1,10p' datei
+awk -F: '$3&gt;=1000{print $1,$3}' OFS='\t' /etc/passwd</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="bash-grundlagen.html" rel="prev">← Vorherige Seite</a> · <a href="debugging-und-tracing.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer">
+<div class="container">
+<span>© Linux Lernportal</span>
+</div>
+</footer>
+</body>
+</html>

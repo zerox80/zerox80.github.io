@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Dateisysteme &amp; FHS – LPIC‑1</title>
+<link href="../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../assets/js/main.js"></script>
+<meta content="Dateisysteme &amp; FHS – LPIC‑1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../index.html">Start</a>
+<a class="active" href="./index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../search.html">Suche</a><a href="../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../index.html">Start</a> ▸ <a href="./index.html">LPIC‑1</a> ▸ Dateisysteme &amp; FHS</div>
+<h2>Dateisysteme &amp; FHS</h2>
+<p class="muted">Struktur, wichtige Verzeichnisse, Mounten, Werkzeuge und Pflege.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px">
+<h3>LPIC‑1 Themen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a class="active" href="dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="paketverwaltung.html">Paketverwaltung</a>
+<a href="prozesse.html">Prozesse &amp; Systemd</a>
+<a href="benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="shells-scripting.html">Shells &amp; Scripting</a>
+<a href="archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav>
+</div>
+</div>
+<div class="card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="dateisysteme-fhs/fhs.html">FHS Überblick</a>
+<a href="dateisysteme-fhs/mount-und-fstab.html">Mount &amp; /etc/fstab</a>
+<a href="dateisysteme-fhs/dateisystem-werkzeuge.html">Dateisystem‑Werkzeuge</a>
+<a href="dateisysteme-fhs/dateisystem-typen.html">Dateisystem‑Typen</a>
+<a href="dateisysteme-fhs/speicheranalyse.html">Speicheranalyse</a>
+<a href="dateisysteme-fhs/inodes-und-links.html">Inodes &amp; Links</a>
+<a href="dateisysteme-fhs/quotas.html">Quotas</a>
+<a href="dateisysteme-fhs/partitionen-und-swap.html">Partitionen &amp; Swap</a>
+<a href="dateisysteme-fhs/labels-und-uuid.html">Labels &amp; UUID</a>
+<a href="dateisysteme-fhs/mount-optionen-und-sicherheit.html">Mount‑Optionen &amp; Sicherheit</a>
+<a href="dateisysteme-fhs/dateisystem-attribute.html">Dateisystem‑Attribute</a>
+<a href="dateisysteme-fhs/tmpfs-und-bind-mounts.html">tmpfs &amp; Bind‑Mounts</a>
+</nav>
+</div>
+</div>
+</aside>
+<article class="content">
+<div class="card block">
+<h3>Lernziele</h3>
+<div class="card-body">
+<ul>
+<li>FHS verstehen: Zweck der wichtigsten Verzeichnisse.</li>
+<li>Mount‑Konzepte: Geräte, Mountpoints, /etc/fstab.</li>
+<li>Dateisystem‑Werkzeuge: mkfs, fsck, tune2fs, xfs_admin u.a.</li>
+<li>Platzanalyse: du, df, find, ncdu (optional).</li>
+</ul>
+</div>
+</div>
+<div class="card block">
+<h3>Zusammenfassung</h3>
+<div class="card-body">
+<p>Linux nutzt einen einheitlichen Verzeichnisbaum. Das FHS (Filesystem Hierarchy Standard) definiert Konventionen, die Distributionen weitgehend befolgen.</p>
+<table>
+<tr><th>Pfad</th><th>Zweck</th></tr>
+<tr><td><code>/</code></td><td>Root des Verzeichnisbaums</td></tr>
+<tr><td><code>/bin</code>, <code>/sbin</code></td><td>Essentielle Programme (für alle bzw. Admin)</td></tr>
+<tr><td><code>/usr</code></td><td>Read‑only Systemprogramme, Bibliotheken, Doku</td></tr>
+<tr><td><code>/var</code></td><td>Veränderliche Daten (Logs, Spools, Caches)</td></tr>
+<tr><td><code>/etc</code></td><td>Systemweite Konfiguration</td></tr>
+<tr><td><code>/home</code></td><td>Benutzerverzeichnisse</td></tr>
+<tr><td><code>/opt</code></td><td>Optionale, fremde Software</td></tr>
+<tr><td><code>/mnt</code>, <code>/media</code></td><td>Temporäre bzw. automatische Mountpoints</td></tr>
+<tr><td><code>/dev</code></td><td>Gerätedateien (udev)</td></tr>
+<tr><td><code>/proc</code>, <code>/sys</code></td><td>Virtuelle Kernel‑Schnittstellen</td></tr>
+</table>
+</div>
+</div>
+<div class="card block">
+<h3>Cheatsheet</h3>
+<div class="card-body">
+<pre><code># Mounts anzeigen
+mount | column -t
+findmnt -t ext4,xfs
+/proc/mounts
+
+# Partitionen / Blockgeräte
+lsblk -f
+blkid
+
+# Mounten / Aushängen
+sudo mount /dev/sdb1 /mnt
+sudo umount /mnt
+
+# /etc/fstab Eintrag (Beispiel)
+UUID=xxxx-xxxx  /data  ext4  defaults,noatime  0  2
+
+# Dateisystem erstellen
+sudo mkfs.ext4 /dev/sdb1
+sudo mkfs.xfs  /dev/sdb2
+
+# Prüfen &amp; reparieren
+sudo fsck -f /dev/sdb1
+
+# Nutzung / Speicher
+df -hT
+du -h -d1 /var
+find /var/log -type f -size +100M
+</code></pre>
+</div>
+</div>
+<div class="card block">
+<h3>Übungen</h3>
+<div class="card-body">
+<ol>
+<li>Erstelle ein neues ext4‑Dateisystem auf <code>/dev/sdb1</code> und mounte es persistierend unter <code>/data</code>.</li>
+<li>Finde die größten Verzeichnisse unter <code>/var</code> und bereinige Logs sicher.</li>
+<li>Erkläre den Unterschied zwischen <code>/mnt</code> und <code>/media</code>.</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Prüfungsfragen (Kurzcheck)</h3>
+<div class="card-body">
+<ol>
+<li>Wofür steht FHS und was regelt es?</li>
+<li>Welche Felder hat ein <code>/etc/fstab</code>-Eintrag?</li>
+<li>Wie listest du Dateisystemtypen mit Mountpoints auf?</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Praxis: Mount &amp; /etc/fstab ausführlich</h3>
+<div class="card-body">
+<p>Ein Dateisystem wird an einen <em>Mountpoint</em> (ein leeres Verzeichnis) eingebunden. Temporär nutzt du <code>mount</code>, dauerhaft definierst du Einträge in <code>/etc/fstab</code>.</p>
+<pre><code># Mountpoint anlegen
+sudo mkdir -p /data
+
+# Temporär mounten (bis zum Reboot)
+sudo mount -t ext4 /dev/sdb1 /data
+
+# Persistenter Eintrag in /etc/fstab (UUID bevorzugt)
+UUID=xxxx-xxxx  /data  ext4  defaults,noatime  0  2
+
+# Einträge testen (ohne Neustart)
+sudo mount -a
+
+# Anhängen/Aushängen
+sudo umount /data
+</code></pre>
+<p><strong>fstab‑Felder:</strong> Gerät (oder UUID), Mountpoint, Typ, Optionen, Dump (0/1), Fsck‑Pass (0/1/2). Für nicht‑kritische Mounts nutze <code>nofail</code>, um Boot‑Hänger zu vermeiden.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Überblick: Dateisystem‑Typen</h3>
+<div class="card-body">
+<ul>
+<li><strong>ext4:</strong> Stabil, weit verbreitet, gut für Allgemein‑Workloads.</li>
+<li><strong>XFS:</strong> Sehr performant bei großen Dateien/Parallelität, häufig auf Servern.</li>
+<li><strong>Btrfs:</strong> Snapshots, Checksums, Subvolumes; gut für Rollbacks, aber Planung nötig.</li>
+<li><strong>F2FS:</strong> Für Flash‑Speicher optimiert.</li>
+<li><strong>vfat/exfat/ntfs:</strong> Austausch mit Windows/Embedded; eingeschränkte POSIX‑Rechte.</li>
+</ul>
+<p>Tipp: Beachte Features wie Journaling, Quotas, Online‑Resize, ACLs. Prüfe Support mit <code>mkfs.&lt;typ&gt;</code> und <code>mount -t</code>.</p>
+</div>
+</div>
+<div class="card block">
+<h3>Speicheranalyse &amp; Pflege</h3>
+<div class="card-body">
+<pre><code># Nutzung &amp; Typen
+df -hT
+findmnt -t ext4,xfs
+
+# Platzfresser finden
+du -h -d1 /var | sort -h
+sudo find /var/log -type f -size +100M -print
+
+# Dateisystem prüfen (umount nötig, außer read‑only checks)
+sudo fsck -f /dev/sdb1
+
+# ext‑Tuning/Infos
+sudo tune2fs -l /dev/sdb1 | less
+</code></pre>
+<p>Für Live‑Analyse eignen sich Tools wie <code>ncdu</code> (falls verfügbar) oder grafische Helfer. Achte auf Logrotation (<code>logrotate</code>).</p>
+</div>
+</div>
+<div class="card block">
+<h3>Weitere Übungen (mit Lösungshinweisen)</h3>
+<div class="card-body">
+<ol start="4">
+<li>
+<p><strong>fstab absichern:</strong> Sorge dafür, dass ein externes Laufwerk den Boot nicht blockiert.</p>
+<details><summary>Lösungshinweise</summary>
+<p>Optionen wie <code>nofail,x-systemd.device-timeout=1</code> nutzen. Test mit <code>mount -a</code>.</p>
+</details>
+</li>
+<li>
+<p><strong>Dateisystem‑Typ vergleichen:</strong> Notiere Vor‑/Nachteile von ext4 vs. XFS für eine Log‑Server‑Partition.</p>
+<details><summary>Lösungshinweise</summary>
+<p>XFS: hohe Parallelität, gut für große Dateien; ext4: sehr robust, universell, Tools allgegenwärtig.</p>
+</details>
+</li>
+</ol>
+</div>
+</div>
+<div class="card block">
+<h3>Zusätzliche Prüfungsfragen</h3>
+<div class="card-body">
+<ol start="4">
+<li>Nenne drei sinnvolle Mount‑Optionen für eine SSD‑Datenpartition und begründe sie.</li>
+<li>Wie würdest du eine Partition anhand ihrer UUID identifizieren und in <code>fstab</code> eintragen?</li>
+<li>Welche Schritte gehst du bei einer korrupten ext4‑Partition?</li>
+</ol>
+</div>
+</div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>man</code></td><td>man 1 chmod; man -k KEYWORD; /Suchbegriff; n weiter</td></tr>
+<tr><td><code>help</code></td><td>Bash builtins: help test; type zeigt Herkunft</td></tr>
+<tr><td><code>info</code></td><td>Detailierte Doku via Info-Seiten</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite.</li>
+<li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen.</li>
+<li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit).</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Reproduktion in frischer VM möglich?</li>
+<li>Änderung minimal &amp; dokumentiert?</li>
+<li>Fallback/Backout‑Plan vorhanden?</li>
+<li>Security‑Implikationen bedacht?</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Manpages effektiv: SYNOPSIS → Optionen → EXAMPLES; eigene Notizen ans Ende der Seite. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Vor Änderung: Backup der Konfig und später diff zum Vergleichen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Alle Schritte in Readme im Repo dokumentieren (Wiederholbarkeit). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nützliche Helfer
+man -k backup
+type chmod
+info coreutils 'File permissions'</code></pre></div></div></main>
+<footer class="site-footer">
+<div class="container">
+<span>© Linux Lernportal</span>
+</div>
+</footer>
+</body>
+</html>

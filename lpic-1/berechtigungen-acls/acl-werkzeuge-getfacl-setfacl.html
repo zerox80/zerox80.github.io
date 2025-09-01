@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>ACL‑Werkzeuge: getfacl, setfacl</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="ACL‑Werkzeuge: getfacl, setfacl" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> ▸ <a href="../index.html">LPIC‑1</a> ▸ <a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a> ▸ ACL‑Werkzeuge</div>
+<h2>ACL‑Werkzeuge: getfacl, setfacl</h2>
+<div class="layout">
+<aside class="sidebar card">
+<h3>Unterthemen</h3>
+<div class="card-body">
+<nav class="toc">
+<a href="rechte-grundlagen.html">Rechte‑Grundlagen</a>
+<a href="chmod-chown-chgrp.html">chmod, chown, chgrp</a>
+<a href="umask-und-defaults.html">umask &amp; Defaults</a>
+<a href="special-bits-suid-sgid-sticky.html">Special Bits (suid/sgid/sticky)</a>
+<a href="acl-grundlagen.html">ACL‑Grundlagen</a>
+<a class="active" href="acl-werkzeuge-getfacl-setfacl.html">ACL‑Werkzeuge</a>
+<a href="zugriffsstrategien-und-best-practices.html">Best Practices</a>
+</nav>
+</div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul><li>getfacl/setfacl praktisch einsetzen.</li></ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code>getfacl file
+setfacl -m u:alice:rw file
+setfacl -R -m g:dev:rwx dir
+setfacl -m d:u:alice:rw dir   # default
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol><li>Setze eine Default‑ACL für ein Projektverzeichnis.</li></ol></div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol><li>Wie entfernst du eine ACL?</li></ol></div></div>
+<div class="card block"><h3>Theorie: POSIX‑ACL Syntax &amp; Mask</h3><div class="card-body">
+<ul>
+<li><strong>Form:</strong> <code>u|g:[name]:[rwx]</code>, <code>m:[rwx]</code> (mask), <code>o:[rwx]</code>, sowie <code>d:</code> für Default auf Verzeichnissen.</li>
+<li><strong>Mask:</strong> Kappung der effektiven Rechte für alle Gruppen/Named‑User‑Einträge (außer <code>user::</code>).</li>
+<li><strong>Effektive Rechte</strong> werden in <code>getfacl</code> mit <code>#effective:</code> angezeigt.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Advanced: setfacl/getfacl in der Praxis</h3><div class="card-body">
+<pre><code># 1) Einzelne Einträge setzen
+setfacl -m u:alice:rw file
+setfacl -m g:dev:rwx file
+
+# 2) Maske explizit setzen (sonst kappen!)
+setfacl -m m:rwx file
+
+# 3) Default-ACLs auf Verzeichnissen (Vererbung)
+setfacl -m d:g:dev:rwx dir
+
+# 4) Rekursiv anwenden (Vorsicht; prüfen!)
+setfacl -R -m g:dev:rx dir
+getfacl -R dir | less
+
+# 5) Entfernen/Löschen
+setfacl -x u:alice file
+setfacl -b file  # alle ACLs löschen
+
+# 6) Kopieren/Restore
+getfacl -R /srv/proj &gt; /root/proj.acl
+setfacl --restore=/root/proj.acl
+
+# 7) Nur Default-ACLs exportieren (Filter)
+getfacl -R /srv/proj | awk '/^default:/'
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Integration: rsync/tar und Netzwerkfreigaben</h3><div class="card-body">
+<ul>
+<li><strong>rsync:</strong> Flag <code>-A</code> für ACLs, <code>-X</code> für xattrs, häufig kombiniert mit <code>-aAX</code>.</li>
+<li><strong>tar:</strong> GNU tar mit <code>--acls --xattrs</code> nutzen.</li>
+<li><strong>Samba/NFS:</strong> Server‑ und Export‑Optionen müssen ACLs unterstützen; ggf. Mapping beachten.</li>
+</ul>
+<pre><code>rsync -aAX --delete /src/ /dst/
+tar --acls --xattrs -cpf backup.tar /srv/proj
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Sicherheit &amp; Audits</h3><div class="card-body">
+<ul>
+<li><strong>Inventar:</strong> <code>getfacl -R</code> regelmäßig sichern, Änderungen versionieren.</li>
+<li><strong>Review:</strong> Vermeide viele user‑spezifische ACLs; bevorzuge Gruppen‑basierte Einträge.</li>
+<li><strong>Suche nach Ausreißern:</strong> Welt‑schreibbare Dateien, ungewollte Ausführungsrechte finden.</li>
+</ul>
+<pre><code>find /srv/proj -type f -perm -o+w -ls
+find /srv/proj -type d -perm -o+w -ls
+            </code></pre>
+</div></div>
+<div class="card block"><h3>Troubleshooting</h3><div class="card-body">
+<ul>
+<li><strong>Mask‑Effekt:</strong> Erwartete <code>rwx</code> wird zu <code>r-x</code> → <code>setfacl -m m:rwx</code>.</li>
+<li><strong>Kopie ohne ACLs:</strong> Nutze <code>rsync -A</code> oder <code>cp --preserve=all</code> (je nach System).</li>
+<li><strong>Default‑ACL greift nicht:</strong> Nur Verzeichnisse haben Default‑ACL; Objekt wurde vorher erstellt?</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Erweiterte Übungen</h3><div class="card-body">
+<ol class="exercise-steps">
+<li>Exportiere alle ACLs eines Projekts, migriere den Baum und stelle sie wieder her.</li>
+<li>Implementiere eine Leserolle via Gruppe und Default‑ACL. Verifiziere mit zwei Testnutzern.</li>
+<li>Schreibe ein Skript, das Abweichungen zur Soll‑ACL meldet.</li>
+</ol>
+</div></div>
+<div class="card block"><h3>Quiz</h3><div class="card-body">
+<div class="quiz" id="quiz-acl-tools-1">
+<div class="quiz-question">Welcher Befehl stellt rekursiv zuvor exportierte ACLs wieder her?</div>
+<div class="quiz-options">
+<label class="quiz-option"><input name="qat1" type="radio"/> rsync -a /src/ /dst/</label>
+<label class="quiz-option" data-correct="1"><input name="qat1" type="radio"/> setfacl --restore=acls.txt</label>
+<label class="quiz-option"><input name="qat1" type="radio"/> getfacl -R DIR</label>
+</div>
+<div class="quiz-actions"><button class="btn primary check-quiz">Prüfen</button><button class="btn reset-quiz">Zurücksetzen</button></div>
+<div class="quiz-feedback"></div>
+</div>
+</div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Dateirechte, Sonderbits und ACLs.</p>
+<ul><li>Symbolische vs. oktale Modi (<code>u+rw,g-w,o=</code> vs. <code>640</code>).</li><li>Sonderbits: <code>suid</code> (u+s), <code>sgid</code> (g+s), <code>sticky</code> (o+t).</li><li>ACLs erlauben benutzerspezifische Rechte zusätzlich zu U/G/O.</li></ul>
+<pre><code># Standardrechte via umask (Beispiel: 022)
+umask 022
+
+# Klassische Rechte
+chmod 640 datei
+chmod u+rwx,g+rx,o-rwx script.sh
+chown alice:proj datei
+
+# Sonderbits
+chmod u+s /usr/local/bin/tool
+chmod g+s /srv/proj
+chmod o+t /tmp
+
+# ACLs
+setfacl -m u:alice:rw- -m g:proj:r-- datei
+getfacl datei
+
+# Default-ACLs für neue Dateien in Ordnern
+setfacl -d -m g:proj:rwX /srv/proj
+</code></pre>
+<h4>Fehlerbilder</h4><ul><li>ACL mask reduziert effektive Rechte → <code>getfacl</code> prüfen (mask).</li><li><code>chmod 777</code> als „Fix“ → in der Prüfung tabu; gezielt Rechte setzen.</li></ul>
+<h4>Prüfungstipps</h4><ul><li>Rechenweg: umask bestimmt <em>abgezogene</em> Bits (Basis 666/777).</li><li><code>X</code> in ACL (großes X) setzt x nur, wenn es ein Ordner ist oder x bereits irgendwo gesetzt war.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>chmod</code></td><td>symbolisch u/g/o/a,+/-/=(rwxXst); oktal 0–7; --reference=DATEI</td></tr>
+<tr><td><code>chown</code></td><td>USER[:GRUPPE] DATEI; -R rekursiv; --from prüfen</td></tr>
+<tr><td><code>chgrp</code></td><td>GRUPPE DATEI; -R rekursiv</td></tr>
+<tr><td><code>setfacl</code></td><td>-m u:NAME:rwX g:GRUPPE:r--; -x Eintrag löschen; -b alle ACLs löschen; -d Default-ACL</td></tr>
+<tr><td><code>getfacl</code></td><td>Effektive Rechte &amp; Mask anzeigen</td></tr>
+<tr><td><code>umask</code></td><td>Basis 666/777; mask subtrahiert Bits; häufig 022 oder 027</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX).</li>
+<li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen.</li>
+<li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD).</li>
+<li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Ownership korrekt? (ls -l)</li>
+<li>U/G/O‑Rechte passend? (chmod)</li>
+<li>ACLs vorhanden &amp; Mask? (getfacl)</li>
+<li>Sonderbits sinnvoll? (suid/sgid/sticky)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Gemeinsamer Teamordner mit Default‑ACL für Gruppe proj (rwX). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Sticky-Bit auf geteilten Ordnern (z. B. /tmp, /shared) gegen versehentliches Löschen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Setuid‑Hilfsprogramm: Sicherheitsprüfung und Alternativen (sudo mit NOPASSWD). – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Backup-User erhält Leserechte per ACL ohne Gruppenwechsel. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Rechte &amp; ACLs
+umask 027
+chmod u=rw,g=r,o= datei
+chown alice:proj datei
+chmod g+s /srv/proj    # sgid
+chmod o+t /shared      # sticky
+setfacl -m u:alice:rw- -m g:proj:rwX ordner
+getfacl ordner</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="acl-grundlagen.html" rel="prev">← Vorherige Seite</a> · <a href="chmod-chown-chgrp.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>PAM-Grundlagen – LPIC-1</title>
+<link href="../../assets/css/style.css" rel="stylesheet"/>
+<script defer="" src="../../assets/js/main.js"></script>
+<meta content="PAM-Grundlagen – LPIC-1" property="og:title"/><meta content="summary" name="twitter:card"/></head>
+<body>
+<header class="site-header">
+<div class="container">
+<h1>Linux Lernportal</h1>
+<nav class="top-nav">
+<a href="../../index.html">Start</a>
+<a class="active" href="../index.html">LPIC-1</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-2</a>
+<a class="disabled" href="#" title="Bald verfügbar">LPIC-3</a>
+<a href="../../search.html">Suche</a><a href="../../lpic-1/glossar.html">Glossar</a><button class="btn" id="themeToggle">🌓</button>
+</nav>
+</div>
+</header>
+<main class="container">
+<div class="breadcrumbs"><a href="../../index.html">Start</a> · <a href="../index.html">LPIC-1</a> · <a href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a> · PAM-Grundlagen</div>
+<h2>PAM-Grundlagen</h2>
+<p class="muted">Pluggable Authentication Modules – Stack, Module und typische Konfigurationen.</p>
+<div class="layout">
+<aside class="sidebar">
+<div class="card" style="margin-bottom:12px"><h3>LPIC-1 Themen</h3><div class="card-body"><nav class="toc">
+<a href="../grundlagen-linux.html">Grundlagen &amp; Philosophien</a>
+<a href="../dateisysteme-fhs.html">Dateisysteme &amp; FHS</a>
+<a href="../berechtigungen-acls.html">Berechtigungen &amp; ACLs</a>
+<a href="../paketverwaltung.html">Paketverwaltung</a>
+<a href="../prozesse.html">Prozesse &amp; Systemd</a>
+<a class="active" href="../benutzer-gruppen.html">Benutzer &amp; Gruppen</a>
+<a href="../netzwerkgrundlagen.html">Netzwerkgrundlagen</a>
+<a href="../shells-scripting.html">Shells &amp; Scripting</a>
+<a href="../archivierung-komprimierung.html">Archivierung &amp; Komprimierung</a>
+<a href="../systemstart-boot.html">Systemstart &amp; Boot</a>
+<a href="../hardware-geraete.html">Hardware &amp; Geräte</a>
+</nav></div></div>
+<div class="card"><h3>Unterthemen</h3><div class="card-body"><nav class="toc">
+<a href="useradd-usermod-userdel.html">useradd, usermod, userdel</a>
+<a href="passwd-shadow-chage.html">passwd, shadow, chage</a>
+<a href="groups-und-gpasswd.html">groups &amp; gpasswd</a>
+<a href="sudoers-und-visudo.html">sudoers &amp; visudo</a>
+<a class="active" href="pam-grundlagen.html">PAM-Grundlagen</a>
+</nav></div></div>
+</aside>
+<article class="content">
+<div class="card block"><h3>Lernziele</h3><div class="card-body"><ul>
+<li>PAM-Stack und Steuerflags (<code>required</code>, <code>sufficient</code>, <code>requisite</code>, <code>optional</code>) verstehen.</li>
+<li>Häufige Module: <code>pam_unix</code>, <code>pam_env</code>, <code>pam_limits</code>, <code>pam_faillock</code>.</li>
+<li>Konfigurationsorte: <code>/etc/pam.d/</code> und service-spezifische Dateien.</li>
+</ul></div></div>
+<div class="card block"><h3>Überblick</h3><div class="card-body">
+<pre><code># Beispiel: /etc/pam.d/sudo (Ausschnitt)
+auth       required   pam_env.so
+auth       required   pam_unix.so
+account    required   pam_unix.so
+password   required   pam_unix.so
+session    required   pam_limits.so
+</code></pre>
+<p>Logins laufen durch die entsprechenden Stacks (auth, account, password, session). Reihenfolge und Flags bestimmen das Verhalten.</p>
+</div></div>
+<div class="card block"><h3>Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Wofür steht das Flag <code>sufficient</code> in PAM?</li>
+<li>Wo liegen die PAM-Konfigurationen für <code>sshd</code>?</li>
+</ol></div></div>
+<div class="card block"><h3>Theorie &amp; Konzepte</h3><div class="card-body">
+<h4>Stacks &amp; Control‑Flags</h4>
+<p>Jeder Dienst besitzt Stacks für <code>auth</code>, <code>account</code>, <code>password</code>, <code>session</code>. Wichtige Flags:</p>
+<ul>
+<li><code>required</code>: Muss bestehen; Fehler werden gesammelt, Entscheidung am Ende negativ.</li>
+<li><code>requisite</code>: Muss bestehen; bei Fehler sofortiger Abbruch.</li>
+<li><code>sufficient</code>: Bei Erfolg ggf. Kurzschluss, wenn zuvor kein <code>required</code> scheiterte.</li>
+<li><code>optional</code>: Zählt nur, wenn alleinstehend.</li>
+</ul>
+</div></div>
+<div class="card block"><h3>Praxis: Typische Konfigurationen</h3><div class="card-body">
+<pre><code># /etc/pam.d/sudo (Beispiel)
+auth       required   pam_env.so
+auth       required   pam_unix.so
+account    required   pam_unix.so
+password   required   pam_unix.so
+session    required   pam_limits.so
+
+# /etc/pam.d/sshd (Ausschnitte; Distro-abhängig)
+auth       required   pam_env.so
+auth       sufficient pam_unix.so try_first_pass
+auth       [default=die] pam_faillock.so authfail
+auth       sufficient pam_faillock.so authsucc
+
+# /etc/pam.d/login (Ausschnitte)
+auth       required   pam_securetty.so
+auth       requisite  pam_nologin.so
+auth       required   pam_unix.so
+session    required   pam_limits.so
+</code></pre>
+<p><strong>Hinweis:</strong> Distro‑Defaults variieren. Vor Änderungen Backups in <code>/etc/pam.d/</code> erstellen und in separatem Terminal testen.</p>
+</div></div>
+<div class="card block"><h3>Account‑Sperren mit pam_faillock</h3><div class="card-body">
+<pre><code># Häufig in system-auth/common-auth inkludiert
+auth   required   pam_faillock.so preauth silent audit deny=5 unlock_time=600
+auth   [success=1 default=bad] pam_unix.so
+auth   [default=die] pam_faillock.so authfail audit
+account required   pam_faillock.so
+
+# Status prüfen / zurücksetzen
+faillock --user alice
+faillock --user alice --reset
+</code></pre>
+</div></div>
+<div class="card block"><h3>Limits &amp; Umgebungsvariablen</h3><div class="card-body">
+<p><code>pam_limits</code> liest <code>/etc/security/limits.conf</code> sowie <code>limits.d/</code> (z. B. <code>nofile</code>, <code>nproc</code>). <code>pam_env</code> setzt Variablen aus <code>/etc/environment</code> bzw. <code>environment.d/</code>.</p>
+</div></div>
+<div class="card block"><h3>Best Practices</h3><div class="card-body"><ul>
+<li><strong>Backup &amp; Test:</strong> Vor Änderungen Dateien sichern; neue Sessions in zweitem Terminal testen, um Lockouts zu vermeiden.</li>
+<li><strong>Reihenfolge:</strong> Flags wie <code>sufficient</code> können spätere Checks überspringen – bewusst einsetzen.</li>
+<li><strong>Logging:</strong> Module mit <code>debug</code>/<code>audit</code> nutzen und <code>journalctl</code> prüfen.</li>
+</ul></div></div>
+<div class="card block"><h3>Cheatsheet</h3><div class="card-body"><pre><code># Orte
+/etc/pam.d/           # Service-Dateien
+
+# Flags (Kurz)
+required  = Fehler am Ende
+requisite = Fehler bricht sofort ab
+sufficient= Erfolg kann kurzschließen
+optional  = zählt nur allein
+
+# Faillock
+faillock --user NAME          # Status
+faillock --user NAME --reset  # Reset
+
+# Limits-Beispiel (/etc/security/limits.d/90-custom.conf)
+*  soft  nofile  65535
+*  hard  nofile  65535
+</code></pre></div></div>
+<div class="card block"><h3>Übungen</h3><div class="card-body"><ol>
+<li>Fügen Sie eine Anmeldebegrenzung mit <code>pam_faillock</code> (5 Fehlversuche, 10 Minuten) hinzu. Demonstrieren Sie Lock/Unlock.</li>
+<li>Konfigurieren Sie <code>pam_limits</code> für erhöhte <code>nofile</code>-Werte und verifizieren Sie diese mit einer neuen Login‑Session.</li>
+<li>Erklären Sie den Unterschied zwischen <code>required</code> und <code>requisite</code> anhand eines minimalen Stacks.</li>
+</ol></div></div>
+<div class="card block"><h3>Zusätzliche Prüfungsfragen</h3><div class="card-body"><ol>
+<li>Welche Bedeutung hat <code>sufficient</code> im <code>auth</code>-Stack und wie beeinflusst es die weitere Verarbeitung?</li>
+<li>Wie prüfen Sie, ob ein Benutzer aufgrund von <code>pam_faillock</code> gesperrt ist?</li>
+<li>Welche Dateien nutzt <code>pam_limits</code> und wie werden Werte wirksam?</li>
+</ol></div></div>
+</article>
+</div>
+<div class="card" id="progressWidget"><div class="card-body"><h3>Kapitel abschließen</h3><p class="muted">Hake dieses Kapitel als erledigt ab. Dein Fortschritt wird nur lokal im Browser gespeichert.</p><label class="checkbox"><input id="pageComplete" type="checkbox"/> Ich habe dieses Kapitel verstanden</label><p><a href="../../lpic-1/fortschritt.html">Zu meinem Fortschritt</a></p></div></div><div class="card"><div class="card-body"><h3>Vertiefung &amp; Praxis</h3><p><strong>Vertiefung:</strong> Benutzer- und Gruppenverwaltung.</p>
+<ul><li>Benutzer-Lebenszyklus: anlegen → Passwort setzen → Gruppenmitgliedschaften → Shell/Home → Ablaufdatum → Sperren/Entsperren.</li><li>Dateirechte &amp; Ownership im Zusammenspiel mit primärer und sekundären Gruppen.</li><li>PAM-Module (Pluggable Authentication Modules): Reihenfolge und Kontrollflags (required, requisite, sufficient, optional).</li></ul>
+<h4>Kommandoreferenz</h4>
+<pre><code># Benutzer anlegen (mit Home, Standardgruppe, Shell)
+sudo useradd -m -s /bin/bash -U alice
+sudo passwd alice
+
+# Benutzer ändern (Shell, Gruppen, Ablauf)
+sudo usermod -s /bin/zsh -aG wheel,audio alice
+sudo chage -E 2025-12-31 alice
+
+# Benutzer sperren/entsperren
+sudo usermod -L alice   # sperren
+sudo usermod -U alice   # entsperren
+
+# Benutzer löschen (+Home)
+sudo userdel -r alice
+
+# Gruppenverwaltung
+getent group developers
+sudo groupadd developers
+sudo gpasswd -a alice developers
+sudo gpasswd -d alice developers
+</code></pre>
+<h4>Praxis-Lab</h4><ol><li>Lege <code>proj</code>‑Gruppe an, füge 2 Nutzer hinzu.</li><li>Erstelle <code>/srv/proj</code> und setze <code>sgid</code>, damit neue Dateien Gruppen‑Ownership erben.</li><li>Erzwinge sichere Passwörter via <code>pam_pwquality.so</code> (minlen, ucredit/lcredit/dcredit).</li></ol>
+<h4>Häufige Fehler</h4><ul><li><em>Permission denied</em> trotz Mitgliedschaft → neu einloggen (Gruppen gelten erst für neue Sessions).</li><li><em>nologin</em>-Shell gesetzt → interaktive Anmeldung scheitert.</li><li>Home nicht erstellt: <code>useradd -m</code> vergessen.</li></ul>
+<h4>Prüfungstipps</h4><ul><li>Unterschied primäre vs. sekundäre Gruppe kennen.</li><li><code>chage</code>‑Felder: minimale/maximale Tage, Warnzeit, Inaktivität.</li><li><code>visudo</code> verwenden, niemals <code>/etc/sudoers</code> direkt editieren.</li></ul></div></div><div class="card"><div class="card-body"><h3>Checkliste – schneller Durchblick</h3>
+<ul>
+<li>Relevante Logdateien geprüft? (<code>journalctl</code>, <code>/var/log/*</code>)</li>
+<li>Manpage/--help gelesen und Option bewusst gewählt?</li>
+<li>Rechte/Ownership/SELinux/AppArmor berücksichtigt?</li>
+<li>Distribution &amp; Version: gleiches Verhalten verifiziert?</li>
+</ul>
+</div></div><div class="card"><div class="card-body"><h3>Prüfungsfragen (MC)</h3><h3>Quiz – Selbsttest</h3><div class="card"><div class="card-body"><p><strong>Frage:</strong> Welche Manpage zeigt Synopsis &amp; Optionen eines Befehls?</p><ol><li><strong>A.</strong> info</li><li><strong>B.</strong> help</li><li><strong>C.</strong> man</li><li><strong>D.</strong> what</li></ol><details><summary>Lösung anzeigen</summary><p><strong>Richtig:</strong> C. man ist Standardreferenz.</p></details></div></div></div></div><div class="card"><div class="card-body"><h3>Optionen‑Atlas (Kernbefehle)</h3><table><tr><th>Kommando</th><th>Wichtige Optionen</th></tr><tr><td><code>useradd</code></td><td>-m  Home anlegen; -s Shell; -U Gruppe erstellen; -G Sekundärgruppen; -e Ablaufdatum (YYYY-MM-DD)</td></tr>
+<tr><td><code>usermod</code></td><td>-aG Gruppen anhängen; -L sperren; -U entsperren; -s Shell; -e Ablaufdatum; -c Kommentar</td></tr>
+<tr><td><code>userdel</code></td><td>-r Home &amp; Mailspool löschen; (Achtung: Dateien auf anderen Mounts bleiben!)</td></tr>
+<tr><td><code>chage</code></td><td>-l anzeigen; -E Ablaufdatum; -m minimal; -M maximal; -W Warnzeit; -I Inaktivität</td></tr>
+<tr><td><code>passwd</code></td><td>-l sperren; -u entsperren; -e sofort ablaufen lassen; -n minimal; -x maximal; -w Warnzeit</td></tr>
+<tr><td><code>gpasswd</code></td><td>-a hinzufügen; -d entfernen; -A Admins; -M Mitglieder setzen</td></tr></table></div></div><div class="card"><div class="card-body"><h3>Szenarien aus der Praxis</h3><ul><li>Projektordner /srv/proj mit sgid: neue Dateien erben Gruppen‑Ownership.</li>
+<li>Service-Account ohne Login: Shell /usr/sbin/nologin und keine Home-Erstellung.</li>
+<li>Passwortpolitik mit pam_pwquality: Mindestlänge &amp; Zeichencocktail erzwingen.</li>
+<li>Temporäre Adminrechte via sudoers Drop-In in /etc/sudoers.d/NAME.</li></ul></div></div><div class="card"><div class="card-body"><h3>Diagnose-Flow (schneller Pfad zur Lösung)</h3><ol><li>Existiert der Nutzer/Gruppe? (getent passwd/group)</li>
+<li>Richtige Shell/Home gesetzt? (useradd/usermod -s/-m)</li>
+<li>Passwort/Lock‑Status ok? (passwd -S, chage -l)</li>
+<li>Gruppenmitgliedschaften aktiv? (id; neue Session nötig)</li></ol></div></div><div class="card"><div class="card-body"><h3>Erweiterte Übungen</h3><p>Bearbeite die Aufgaben, dokumentiere die Schritte und vergleiche die Ergebnisse mit den Erwartungen. Nutze eine frische VM für reproduzierbare Ergebnisse.</p><ol><li>Projektordner /srv/proj mit sgid: neue Dateien erben Gruppen‑Ownership. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Service-Account ohne Login: Shell /usr/sbin/nologin und keine Home-Erstellung. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Passwortpolitik mit pam_pwquality: Mindestlänge &amp; Zeichencocktail erzwingen. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li><li>Temporäre Adminrechte via sudoers Drop-In in /etc/sudoers.d/NAME. – <em>liefere Befehle, Begründung und Nachweise (Logs/Outputs)</em>.</li></ol></div></div><div class="card"><div class="card-body"><h3>Cheatsheet – erweitert</h3><pre><code># Nutzer &amp; Gruppen
+sudo useradd -m -s /bin/bash -U alice
+sudo passwd alice
+sudo usermod -aG wheel,audio alice
+sudo chage -E 2025-12-31 alice
+sudo usermod -L alice   # sperren
+sudo userdel -r alice
+getent passwd alice; getent group wheel</code></pre></div></div><div class="card" id="prevnext"><div class="card-body"><h3>Weiter navigieren</h3><p><a href="groups-und-gpasswd.html" rel="prev">← Vorherige Seite</a> · <a href="passwd-shadow-chage.html" rel="next">Nächste Seite →</a></p></div></div></main>
+<footer class="site-footer"><div class="container"><span>© Linux Lernportal</span></div></footer>
+</body>
+</html>
